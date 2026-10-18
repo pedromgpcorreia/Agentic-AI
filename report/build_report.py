@@ -123,7 +123,6 @@ def table(cap, header, rows, widths, size=7.5, align=None):
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
     t.autofit = False
     tblPr = t._tbl.tblPr
-    lay = OxmlElement("w:tblLayout"); lay.set(qn("w:type"), "fixed"); tblPr.append(lay)
     for i, row in enumerate([header] + rows):
         for j, val in enumerate(row):
             c = t.cell(i, j)
@@ -155,6 +154,14 @@ def table(cap, header, rows, widths, size=7.5, align=None):
     if old is not None:
         tblPr.remove(old)
     tblPr.append(tw)
+    order = ["tblStyle", "tblpPr", "tblOverlap", "bidiVisual", "tblStyleRowBandSize",
+             "tblStyleColBandSize", "tblW", "jc", "tblCellSpacing", "tblInd", "tblBorders",
+             "shd", "tblLayout", "tblCellMar", "tblLook"]
+    kids = sorted(list(tblPr), key=lambda e: order.index(e.tag.split("}")[1])
+                  if e.tag.split("}")[1] in order else len(order))
+    for k in kids:
+        tblPr.remove(k)
+        tblPr.append(k)
     doc.add_paragraph(style="Normal").paragraph_format.space_after = Pt(0)
     return t
 
@@ -645,6 +652,9 @@ with zipfile.ZipFile(OUT) as zin, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED
         data = zin.read(item.filename)
         if item.filename == "word/comments.xml":
             data = re.sub(rb"<w:comment\b.*?</w:comment>", b"", data, flags=re.S)
+        elif item.filename == "word/numbering.xml":
+            # schema order inside <w:lvl>: numFmt before pStyle (template converted from .doc)
+            data = re.sub(rb"(<w:pStyle [^>]*/>)(<w:numFmt [^>]*/>)", rb"\2\1", data)
         elif item.filename == "word/footnotes.xml":
             data = re.sub(rb'<w:footnote (?:(?!w:type=)[^>])*>.*?</w:footnote>', b"", data, flags=re.S)
         zout.writestr(item, data)
