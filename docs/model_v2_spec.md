@@ -112,8 +112,15 @@ Para cada operadora k:
 - Com contrato em curso, só pode mudar se R·(p_atual − p_nova) − penalização > 0, com R = meses em falta e
   penalização = 50% (1.º ano) ou 30% (2.º ano) das mensalidades em falta (Lei 16/2022).
   No cenário "bloqueio total" não pode mudar.
-- Fim do contrato: com probabilidade ρ renova (refidelização, 24 meses ao preço atual); senão fica sem
-  contrato e pode mudar em qualquer mês. **ρ = 0,5 (pressuposto; sensibilidade 0,3–0,7).**
+- Fim do contrato: o consumidor passa pela decisão normal do mês (hábito → exploração → utilidade), sem
+  penalização, e pode mudar de operadora. Se mudar, assina contrato com a nova operadora.
+- Se ficar na mesma operadora, esta oferece um desconto de refidelização δ = 10% sobre o preço atual em troca
+  de um novo contrato de 24 meses. O consumidor aceita se o desconto for maior do que o seu custo de ficar preso:
+  aceita se δ·p ≥ c_j. Se não aceitar, fica sem fidelização (paga o preço atual e pode sair em qualquer mês).
+- Custo de compromisso c_j (Confraria et al., 2017): €1,31/mês para reduzir o compromisso de 12 para 6 meses,
+  ou seja ~€0,22 por mês de compromisso. Para 24 meses: c = €5,25/mês em média. Heterogeneidade entre consumidores:
+  c_j uniforme entre 50% e 150% da média (€2,6–7,9), fixo para cada consumidor.
+- A DIGI não tem refidelização: após os 3 meses iniciais o cliente fica livre.
 - No início, uma fração φ dos consumidores está fidelizada, com meses decorridos uniformes entre 0 e 23.
   **φ = 0,7 (pressuposto; sem dado público encontrado).**
 
@@ -209,7 +216,8 @@ pago, % de consumidores fidelizados, receita e margem por operadora, qualidade d
 | Pressuposto | Valor | Estado |
 |---|---|---|
 | Fidelizados no início (φ) | 70% | Sem dado público (não consta do relatório *O Sector das Comunicações 2024*); sensibilidade 50–90% |
-| Refidelização no fim do contrato (ρ) | — | Em discussão: proposta de regra endógena (secção 11.6) |
+| Desconto de refidelização (δ) | 10% | Decisão do grupo; sensibilidade 5–20% (secção 11.6) |
+| Heterogeneidade do custo de compromisso | ±50% | Pressuposto; o desvio estimado por Confraria et al. não é significativo |
 
 ---
 
@@ -277,6 +285,21 @@ quase não mudou (+0,6 p.p.). A qualidade sobe com o tempo desde a entrada, e n�
 - A recompensa do reforço é a margem e não a receita: com 40% de margem, uma descida de 10% no preço reduz o lucro
   por cliente em 25% e exige ~33% mais clientes para compensar.
 
-### 11.6 Fim do contrato (em discussão)
-Ver mensagem ao grupo de 29/10: em vez de uma probabilidade fixa ρ, o consumidor decide no fim do contrato.
+### 11.6 Fim do contrato e refidelização (decidido em 29/10)
+- Decisão: no fim do contrato o consumidor decide como em qualquer outro mês e pode mudar sem penalização.
+  A refidelização deixa de ser uma probabilidade fixa e passa a ser uma escolha do consumidor.
+- Regra: se ficar, a operadora oferece um desconto δ = 10% por um novo contrato de 24 meses; o consumidor aceita
+  se δ·p ≥ c_j, sendo c_j o seu custo de ficar preso.
+- Justificação do custo c_j: Confraria et al. (2017, Tabela 4) estimam que os consumidores pagam €1,31/mês para
+  reduzir o compromisso de 12 para 6 meses (≈ €0,22 por mês de compromisso). Para 24 meses, c ≈ €5,25/mês.
+  Pressuposto: o custo cresce linearmente com a duração e é igual em euros para pacotes fixos.
+- Justificação de δ = 10%: valor de referência que gera uma taxa de refidelização intermédia (com o preço da MEO,
+  €4,25 de desconto; aceitam os consumidores com c_j abaixo desse valor, cerca de 30%). Testa-se δ = 5%, 15% e 20%.
+- Verificação: Confraria et al. estimam que ~86% dos contratos móveis que terminam ficam na mesma operadora
+  (13,6% saem). No modelo, a percentagem de consumidores que muda de operadora no fim do contrato deve ser da mesma ordem.
 
+### 11.7 Confirmação de que a NOWO já era barata antes da DIGI
+Tabela do idealista (janeiro 2024, pacotes com telemóvel): NOWO €30/mês (€20 nos primeiros 12 meses), NOS €60,99,
+MEO €66,99, Vodafone €67,50. Na Tabela 20 da ANACOM (dezembro 2024): pacote 4P NOWO €36,25 contra ~€56 dos incumbentes.
+A NOWO cobrava cerca de metade dos incumbentes e tinha apenas 2,6% de quota: o preço baixo, só por si, não garante
+quota. Este facto reforça os mecanismos do modelo (hábito, norma, contratos e qualidade).
