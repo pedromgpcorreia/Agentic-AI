@@ -1,0 +1,238 @@
+# Especificação do modelo novo (v2): entrada da DIGI no mercado português de pacotes
+
+Documento interno para o grupo validar antes da implementação (fases 2 a 4).
+O relatório final será escrito em inglês a partir deste documento.
+
+Estado: **rascunho para validação**, 29/10/2026.
+
+---
+
+## 1. Pergunta do trabalho
+
+Como evoluem as quotas de mercado quando uma operadora low-cost (DIGI) entra num mercado de pacotes
+dominado por três incumbentes com contratos de fidelização, e qual a melhor resposta de preço dos
+incumbentes (tarefa 5: aprendizagem por reforço)?
+
+Facto a explicar (dados ANACOM): a DIGI/NOWO passou de 2,6% (3T2024) para 3,2% (1T2026), +0,6 p.p.
+em ~18 meses, apesar de cobrar cerca de metade do preço. Os incumbentes quase não mexeram nas quotas
+nem nos preços das marcas principais.
+
+---
+
+## 2. Decisões tomadas pelo grupo
+
+| Tema | Decisão |
+|---|---|
+| Estrutura de decisão | A do Consumer Choice: hábito → exploração → utilidade. Acrescenta-se preço e contratos |
+| Unidade de tempo | 1 tick = 1 mês |
+| Fidelização | Saída antecipada com penalização legal (Lei 16/2022); opção de bloqueio total como cenário |
+| População | Variável, com mínimo de 1000 agentes |
+| DIGI | Herda a base da NOWO no momento da entrada |
+| Qualidade | A partir das reclamações por mil clientes (ANACOM). Incumbentes constantes; DIGI melhora com o tempo |
+| Preços antes da DIGI | Fixos e alinhados (conluio tácito). O reforço começa na entrada da DIGI |
+| Implementação | Python/Mesa, módulo novo; o baseline (tarefas 1 e 2) fica intacto |
+
+---
+
+## 3. O que se mantém do baseline
+
+- Consumidores numa rede social de vizinhos mais próximos (regra igual à do baseline).
+- Decisão mensal em três passos: (1) fica por hábito com probabilidade `satisfação = log10(1 + 9q)`;
+  (2) senão, experimenta outra operadora com probabilidade `exploration`; (3) senão, escolhe a de maior utilidade.
+- Utilidade = norma (partilha de amigos que usam a operadora) + utilidade de produto (experiência própria + informação dos amigos).
+- Memória: o consumidor só conhece a qualidade das operadoras que usou ou de que os amigos falaram.
+  Uma melhoria de qualidade numa operadora que ninguém à volta usa não é percebida.
+- Outputs do baseline: quotas por operadora e clustering.
+
+---
+
+## 4. O que muda
+
+### 4.1 Operadoras
+
+| Operadora | Quota inicial (3T2024) | Preço (fibra + TV, com IVA) | Contrato | Qualidade q |
+|---|---|---|---|---|
+| MEO | 41,8% | €42,49 | 24 meses | 0,848 |
+| NOS | 35,0% | €42,49 | 24 meses | 0,784 |
+| Vodafone | 20,6% | €40,50 | 24 meses | 0,776 |
+| NOWO (até à entrada) | 2,6% | ~€30 *(pressuposto, a confirmar)* | 24 meses | 0,572 |
+| DIGI (a partir da entrada) | herda a NOWO | €22,00 | 3 meses | 0,572 → 0,756 |
+
+Fontes: quotas ANACOM (pacotes de serviços, 3T2024); preços barómetro CNN Portugal/DECO PROteste
+(outubro 2025; a NOS estava a €42,49 antes de baixar €2 com corte de velocidade); DIGI €10 fibra 1 Gbps
++ €12 TV e compromisso de 3 meses (Observador, 04/11/2024).
+
+Nota: a receita média por cliente (ANACOM) não é usada como preço, porque reflete a mistura de pacotes
+(a NOS vende mais 4/5P) e não o preço de um serviço igual. Serve para validação.
+
+### 4.2 Qualidade a partir das reclamações
+
+Reclamações por mil clientes (ANACOM): 2025 — MEO 4,0, NOS 6,2, Vodafone 7,7, DIGI/NOWO 18,7;
+2T2026 — MEO 1,6, NOS 2,0, Vodafone 1,7, DIGI 2,2.
+
+Como os períodos não são comparáveis em valor absoluto (ano vs trimestre), usa-se a razão face à
+média dos incumbentes, r. Mapeamento (pressuposto):
+
+    q = 0,80 − κ · ln(r),   κ = 0,20
+
+- Incumbentes: média de r nos dois períodos → MEO 0,848; NOS 0,784; Vodafone 0,776.
+- DIGI: r = 3,13 em 2025 → q = 0,572 na entrada; r = 1,25 no 2T2026 → q = 0,756.
+  Sobe linearmente de 0,572 (entrada) até 0,756 (entrada + 18 meses) e fica constante.
+- NOWO: valor do grupo DIGI/NOWO em 2025 (0,572).
+- Análise de sensibilidade: κ = 0,10 e 0,30.
+
+A qualidade da DIGI depende do tempo desde a entrada e não da quota: os dados mostram queda das
+reclamações sem crescimento relevante de quota.
+
+### 4.3 Utilidade com preço
+
+Para cada operadora k:
+
+    U_k = w · N_k + (1 − w) · [ (E_k + I_k)/2 − θ · p_k ]
+
+- N_k: fração de amigos que usam k (norma, como no baseline).
+- E_k: qualidade lembrada; I_k: qualidade transmitida por amigos (como no baseline).
+- p_k: preço pago (contrato em vigor) ou preço atual da operadora.
+- w = `norm_influence` (calibrar; ponto de partida 0,15).
+- θ obtido de Confraria et al. (2017), Tabela 4: o preço vale −0,074 por €/mês e a quota de mercado
+  (40% vs 15%) vale +0,189. A razão dá ~€10,2 por unidade de quota. Impondo a mesma razão entre norma e
+  preço: θ = w / ((1 − w) · 10,22). Com w = 0,15, θ = 0,0173 por euro (€20 de diferença ≈ 0,35 de utilidade de produto).
+- Pressuposto a declarar: Confraria mede a quota nacional no móvel; aqui aplica-se à quota entre amigos nos pacotes fixos.
+
+### 4.4 Contratos e penalização
+
+- Ao escolher uma operadora, o consumidor assina um contrato: 24 meses (incumbentes, NOWO) ou 3 meses (DIGI),
+  ao preço em vigor nesse mês. Paga esse preço até ao fim do contrato.
+- Com contrato em curso, só pode mudar se R·(p_atual − p_nova) − penalização > 0, com R = meses em falta e
+  penalização = 50% (1.º ano) ou 30% (2.º ano) das mensalidades em falta (Lei 16/2022).
+  No cenário "bloqueio total" não pode mudar.
+- Fim do contrato: com probabilidade ρ renova (refidelização, 24 meses ao preço atual); senão fica sem
+  contrato e pode mudar em qualquer mês. **ρ = 0,5 (pressuposto; sensibilidade 0,3–0,7).**
+- No início, uma fração φ dos consumidores está fidelizada, com meses decorridos uniformes entre 0 e 23.
+  **φ = 0,7 (pressuposto; sem dado público encontrado).**
+
+### 4.5 Entrada da DIGI
+
+- Tick de entrada T = 12 (t = 0 corresponde a novembro de 2023; T = novembro de 2024).
+- Os clientes da NOWO passam a clientes da DIGI, mantendo o contrato e o preço até ao fim; depois pagam o preço DIGI.
+- A informação sobre a DIGI espalha-se pelos mecanismos do baseline: clientes da DIGI (ex-NOWO e novos)
+  transmitem a qualidade aos amigos, e a exploração leva consumidores a experimentá-la.
+
+### 4.6 População
+
+- Saída mensal: d = 0,5% dos consumidores *(pressuposto; sensibilidade 0,3–1%)*.
+- Entrada mensal: b = d + 0,083%, para um crescimento líquido de ~1%/ano (subscritores de pacotes 4,7 → 4,8 milhões, ANACOM).
+- Mínimo: se a população ficar abaixo de 1000, entram consumidores até repor o mínimo.
+- Quem entra: sem contrato, posição aleatória, ligado aos `avg_connections` consumidores mais próximos
+  (assim a rede não se desfaz). Escolhe pela utilidade, com o que os amigos lhe transmitem.
+- Cada agente representa ~4700 subscritores (4,7 milhões / 1000).
+
+### 4.7 Preços dos incumbentes
+
+- Antes da entrada: fixos (tabela 4.1). Representa o conluio tácito observado (preços quase iguais).
+- Depois da entrada: tarefa 5 (secção 7). No modelo sem aprendizagem (fase 3), os preços ficam fixos,
+  com cenários para cada nível de preço.
+
+---
+
+## 5. Ordem das operações em cada mês
+
+1. Entradas e saídas de consumidores (mínimo 1000).
+2. Entrada da DIGI (se t = T) e atualização da qualidade da DIGI.
+3. Decisão de consumo (hábito → exploração → utilidade), com a restrição do contrato.
+4. Atualização das utilidades (experiência, informação dos amigos, norma, preço).
+5. Contratos: descontar um mês; fim de contrato → renovação com probabilidade ρ.
+6. Operadoras: preços (fixos, ou bandit a cada 3 meses após a entrada).
+7. Registo dos outputs.
+
+---
+
+## 6. Calibração e validação
+
+**Alvos (ANACOM):**
+
+| Momento | Mês do modelo | DIGI/NOWO | MEO / NOS / Vodafone |
+|---|---|---|---|
+| 3T2024 (antes) | 10 | 2,6% | 41,8 / 35,0 / 20,6 |
+| 2T2025 | 19 | 2,8% | 41,7 / 34,9 / 20,5 |
+| 4T2025 | 25 | 3,0% | 41,6 / 34,9 / 20,4 |
+| 1T2026 | 28 | 3,2% | 41,5 / 34,9 / 20,3 |
+
+**Procedimento:**
+1. Aquecimento de 12 meses sem DIGI: as quotas têm de ficar estáveis (±0,5 p.p.). Se houver deriva,
+   acrescentar constantes de marca por operadora calibradas neste período (prática habitual em modelos de escolha).
+2. Grelha sobre `norm_influence` e `exploration` (e `information_exchange` se necessário), 30 corridas por
+   ponto, minimizando o erro quadrático face aos alvos da DIGI.
+3. Resultado aceitável: DIGI a 3,2% ± 0,5 p.p. no mês 28.
+
+**Outputs registados todos os meses:** quotas por operadora, clustering, número de mudanças, preço médio
+pago, % de consumidores fidelizados, receita e margem por operadora, qualidade da DIGI, população.
+
+---
+
+## 7. Tarefa 5: aprendizagem por reforço (resumo; detalhe na fase 4)
+
+- Agentes que aprendem: MEO, NOS e Vodafone. A DIGI mantém o preço.
+- Início: no mês da entrada da DIGI. Decisão de 3 em 3 meses.
+- Ações: preço = preço base × {1,00; 0,95; 0,90; 0,85; 0,80}.
+- Recompensa: margem do trimestre = Σ (preço do contrato − custo unitário) dos clientes, menos custo fixo.
+  Custo unitário = 60% do preço base *(pressuposto: margem de ~40%; sensibilidade)*.
+  A recompensa é a margem e não a receita, por ser o objetivo das empresas.
+- Método: bandit ε-greedy com passo constante (α = 0,2; ε = 0,1), valores iniciais na escala das recompensas (Sutton & Barto, 2018).
+- Referência de comparação: os cenários de preço fixo da fase 3.
+- Validação qualitativa: na realidade os incumbentes não baixaram os preços das marcas principais e responderam com
+  marcas low-cost (Uzo, Woo, Amigo, a €25 no barómetro de outubro 2025).
+- Discussão: três operadoras a aprender ao mesmo tempo tornam o problema não estacionário; a literatura mostra que
+  algoritmos de aprendizagem podem convergir para preços de conluio (Calvano et al., 2020).
+- Cenário opcional: aprendizagem também antes da entrada, para testar se o conluio se mantém.
+
+---
+
+## 8. Implementação
+
+- Módulo novo `consumer_choice/telecom.py` (classe `TelecomMarketModel`). `model.py` (baseline) não muda.
+- Teste de segurança: com 2 operadoras, sem preços, contratos nem demografia, o modelo novo reproduz o baseline com as mesmas seeds.
+- Testes: população ≥ 1000; contadores de contrato; exemplos de cálculo da penalização; soma das quotas = 100%.
+- Experiências em `experiments/`, resultados em `results/v2/`. Um commit por fase.
+
+---
+
+## 9. Pressupostos a confirmar pelo grupo
+
+| Pressuposto | Valor | Porquê |
+|---|---|---|
+| Preço da NOWO antes da entrada | ~€30 | Sem preço de tabela encontrado |
+| Fidelizados no início (φ) | 70% | Sem dado público encontrado |
+| Refidelização no fim do contrato (ρ) | 50% | Sem dado público encontrado |
+| Saída mensal de consumidores (d) | 0,5% | Sem dado; o crescimento líquido (+1%/ano) é dado |
+| Mapeamento reclamações → qualidade (κ) | 0,20 | Escolha de modelação; sensibilidade 0,1–0,3 |
+| Margem dos incumbentes | 40% | Para a recompensa do reforço |
+
+---
+
+## 10. Referências (corrigidas, formato LNCS)
+
+1. Jager, W., Wang, S.: NetLogo Consumer Choice model. CCL, Northwestern University (2024)
+2. Wilensky, U.: NetLogo. CCL, Northwestern University (1999)
+3. Janssen, M.A., Jager, W.: Fashions, Habits and Changing Preferences: Simulation of Psychological Factors Affecting Market Dynamics. J. Econ. Psychol. 22(6), 745–772 (2001)
+4. Cialdini, R.B., Goldstein, N.J.: Social Influence: Compliance and Conformity. Annu. Rev. Psychol. 55, 591–621 (2004)
+5. Nyborg, K., et al.: Social Norms as Solutions. Science 354(6308), 42–43 (2016)
+6. ter Hoeven, E., et al.: Mesa 3: Agent-Based Modeling with Python in 2025. J. Open Source Softw. 10(107), 7668 (2025)
+7. Grimm, V., et al.: The ODD Protocol for Describing Agent-Based and Other Simulation Models: A Second Update. JASSS 23(2), 7 (2020)
+8. Confraria, J., Ribeiro, T., Vasconcelos, H.: Analysis of Consumer Preferences for Mobile Telecom Plans Using a Discrete Choice Experiment. Telecommun. Policy 41(3), 157–169 (2017). https://doi.org/10.1016/j.telpol.2016.12.009
+9. Wang, R., Wang, Z.: Consumer Choice Models with Endogenous Network Effects. Manag. Sci. (2017). https://doi.org/10.1287/mnsc.2016.2520
+10. Griffin, M., Lyons, S., Mohan, G., Joseph, M., Mac Domhnaill, C., Evans, J.: Intra-Operator Mobile Plan Switching: Evidence from Linked Survey and Billing Microdata. Telecommun. Policy 46, 102343 (2022)
+11. Twomey, P., Cadman, R.: Agent-Based Modelling of Customer Behaviour in the Telecoms and Media Markets. info 4(1) (2002)
+12. Mittal, A., Huang, W., Krejci, C.C.: Consumer-Adoption Modeling of Distributed Solar Using an Agent-Based Approach. In: CSS 2017. ACM (2017). https://doi.org/10.1145/3145574.3145602
+13. Vanderlynden, J., Mathieu, P., Warlop, R.: Agent-Based Modeling of Context Effects in Consumer Choice. In: ECAI 2025, pp. 3622–3629. IOS Press (2025). https://doi.org/10.3233/FAIA251239
+14. Vimaladhevi, N., Thaiyalnayaki, M.: Analyzing the Influence of Reference Groups on Consumer Brand Connectivity through Behavioral Modeling. In: GTSS 2026. IEEE (2026). https://doi.org/10.1109/GTSS68743.2026.11679887
+15. Sturley, C.E.: A Proof of Concept Agent-Based Model of Consumer Store Choice Behaviour. MSc dissertation, University of Leeds (2016)
+16. Sutton, R.S., Barto, A.G.: Reinforcement Learning: An Introduction, 2nd edn. MIT Press (2018)
+17. Calvano, E., Calzolari, G., Denicolò, V., Pastorello, S.: Artificial Intelligence, Algorithmic Pricing, and Collusion. Am. Econ. Rev. 110(10), 3267–3297 (2020). https://doi.org/10.1257/aer.20190623
+
+Fontes de dados: ANACOM (pacotes de serviços 1T2024, 3T2024, 2T2025, 4T2025, 1T2026; reclamações 2025 e 2T2026);
+barómetro CNN Portugal/DECO PROteste (outubro 2025); DECO PROteste (penalizações, Lei 16/2022); Observador (preços DIGI, 2024).
+
+Notas sobre o documento do Zé: o Wang & Wang foi publicado em 2017 (o DOI correto é …2520); no Griffin, os 54% referem-se
+a mudanças de tarifário dentro da mesma operadora que aumentaram o sobrecusto face ao melhor plano, sem atribuição a
+vieses; Venables & Bilge (1998) falta na lista de referências; Campos et al. (2013) não é citado no texto.
