@@ -3,7 +3,7 @@
 Documento interno para o grupo validar antes da implementação (fases 2 a 4).
 O relatório final será escrito em inglês a partir deste documento.
 
-Estado: **rascunho para validação**, 29/10/2026.
+Estado: **rascunho para validação**, 29/10/2026 (revisto às 17h com as decisões do grupo; ver secção 11).
 
 ---
 
@@ -55,12 +55,18 @@ nem nos preços das marcas principais.
 | MEO | 41,8% | €42,49 | 24 meses | 0,848 |
 | NOS | 35,0% | €42,49 | 24 meses | 0,784 |
 | Vodafone | 20,6% | €40,50 | 24 meses | 0,776 |
-| NOWO (até à entrada) | 2,6% | ~€30 *(pressuposto, a confirmar)* | 24 meses | 0,572 |
+| NOWO (até à entrada) | 2,6% | €26,35 | 24 meses | 0,572 |
 | DIGI (a partir da entrada) | herda a NOWO | €22,00 | 3 meses | 0,572 → 0,756 |
 
 Fontes: quotas ANACOM (pacotes de serviços, 3T2024); preços barómetro CNN Portugal/DECO PROteste
 (outubro 2025; a NOS estava a €42,49 antes de baixar €2 com corte de velocidade); DIGI €10 fibra 1 Gbps
-+ €12 TV e compromisso de 3 meses (Observador, 04/11/2024).
++ €12 TV e compromisso de 3 meses (Observador, 04/11/2024); NOWO €26,35: ANACOM, *O Sector das Comunicações 2024*,
+Tabela 20 (mensalidade mínima BLF+TVS, dezembro de 2024, com IVA, contratos de 24 meses).
+
+Nota sobre as marcas low-cost: na mesma Tabela 20, a mensalidade mínima de internet + TV dos incumbentes,
+incluindo as marcas Uzo, Woo e oteuamigo, já era €25 (MEO, NOS) e €22 (Vodafone) em dezembro de 2024, contra €22 da DIGI.
+O modelo usa o preço da marca principal (onde está a maioria dos clientes) e trata o nível ~€25 como o limite
+inferior das ações de preço do reforço (secção 7).
 
 Nota: a receita média por cliente (ANACOM) não é usada como preço, porque reflete a mistura de pacotes
 (a NOS vende mais 4/5P) e não o preço de um serviço igual. Serve para validação.
@@ -120,7 +126,7 @@ Para cada operadora k:
 
 ### 4.6 População
 
-- Saída mensal: d = 0,5% dos consumidores *(pressuposto; sensibilidade 0,3–1%)*.
+- Saída mensal: d = 0,5% dos consumidores (decisão do grupo; justificação na secção 11; sensibilidade 0,3–1%).
 - Entrada mensal: b = d + 0,083%, para um crescimento líquido de ~1%/ano (subscritores de pacotes 4,7 → 4,8 milhões, ANACOM).
 - Mínimo: se a população ficar abaixo de 1000, entram consumidores até repor o mínimo.
 - Quem entra: sem contrato, posição aleatória, ligado aos `avg_connections` consumidores mais próximos
@@ -176,7 +182,8 @@ pago, % de consumidores fidelizados, receita e margem por operadora, qualidade d
 - Início: no mês da entrada da DIGI. Decisão de 3 em 3 meses.
 - Ações: preço = preço base × {1,00; 0,95; 0,90; 0,85; 0,80}.
 - Recompensa: margem do trimestre = Σ (preço do contrato − custo unitário) dos clientes, menos custo fixo.
-  Custo unitário = 60% do preço base *(pressuposto: margem de ~40%; sensibilidade)*.
+  Custo unitário = 60% do preço base (margem de 40%, a partir das margens EBITDA de 2024: NOS 45,3%, MEO 35,8%;
+  sensibilidade 40% e 60%; ver secção 11).
   A recompensa é a margem e não a receita, por ser o objetivo das empresas.
 - Método: bandit ε-greedy com passo constante (α = 0,2; ε = 0,1), valores iniciais na escala das recompensas (Sutton & Barto, 2018).
 - Referência de comparação: os cenários de preço fixo da fase 3.
@@ -197,16 +204,12 @@ pago, % de consumidores fidelizados, receita e margem por operadora, qualidade d
 
 ---
 
-## 9. Pressupostos a confirmar pelo grupo
+## 9. Pressupostos ainda em aberto
 
-| Pressuposto | Valor | Porquê |
+| Pressuposto | Valor | Estado |
 |---|---|---|
-| Preço da NOWO antes da entrada | ~€30 | Sem preço de tabela encontrado |
-| Fidelizados no início (φ) | 70% | Sem dado público encontrado |
-| Refidelização no fim do contrato (ρ) | 50% | Sem dado público encontrado |
-| Saída mensal de consumidores (d) | 0,5% | Sem dado; o crescimento líquido (+1%/ano) é dado |
-| Mapeamento reclamações → qualidade (κ) | 0,20 | Escolha de modelação; sensibilidade 0,1–0,3 |
-| Margem dos incumbentes | 40% | Para a recompensa do reforço |
+| Fidelizados no início (φ) | 70% | Sem dado público (não consta do relatório *O Sector das Comunicações 2024*); sensibilidade 50–90% |
+| Refidelização no fim do contrato (ρ) | — | Em discussão: proposta de regra endógena (secção 11.6) |
 
 ---
 
@@ -236,3 +239,44 @@ barómetro CNN Portugal/DECO PROteste (outubro 2025); DECO PROteste (penalizaç�
 Notas sobre o documento do Zé: o Wang & Wang foi publicado em 2017 (o DOI correto é …2520); no Griffin, os 54% referem-se
 a mudanças de tarifário dentro da mesma operadora que aumentaram o sobrecusto face ao melhor plano, sem atribuição a
 vieses; Venables & Bilge (1998) falta na lista de referências; Campos et al. (2013) não é citado no texto.
+
+---
+
+## 11. Registo de decisões e justificações
+
+### 11.1 Preço da NOWO: €26,35
+Mensalidade mínima de internet fixa + TV da NOWO em dezembro de 2024, com IVA, para contratos de 24 meses
+(ANACOM, *O Sector das Comunicações 2024*, Tabela 20). É a única fonte oficial encontrada com o preço da NOWO
+no mesmo tipo de oferta que as restantes operadoras.
+
+### 11.2 Saída mensal de consumidores: d = 0,5%
+- Dado: o número de subscritores de pacotes cresce ~1%/ano (ANACOM: 4,7 → 4,8 milhões). Isto fixa o saldo
+  (entradas − saídas), mas não os valores brutos.
+- Decisão: saídas de 0,5%/mês (~6%/ano) e entradas de ~0,58%/mês (~7%/ano).
+- Justificação: valor intermédio que gera rotação suficiente para haver consumidores novos sem contrato
+  (um canal de entrada da DIGI), sem dominar a dinâmica dos contratos de 24 meses.
+- Como não há dado, o efeito é testado com d = 0,3% e 1%; as conclusões são reportadas com essa amplitude.
+
+### 11.3 Qualidade a partir das reclamações: q = 0,80 − κ·ln(r), κ = 0,20
+- O modelo precisa de uma qualidade entre 0 e 1; os dados são reclamações por mil clientes (ANACOM).
+- r é a razão face à média dos incumbentes, o que permite comparar períodos com escalas diferentes (ano vs trimestre).
+- Forma logarítmica: duplicar as reclamações reduz sempre a qualidade na mesma quantidade (0,14 com κ = 0,20).
+- O valor 0,80 para o incumbente médio e κ = 0,20 são escolhas de modelação, não estimativas. Por isso o
+  modelo corre também com κ = 0,10 e 0,30, e o relatório indica se as conclusões mudam.
+- Resultado com κ = 0,20: MEO 0,848; NOS 0,784; Vodafone 0,776; DIGI 0,572 na entrada e 0,756 após 18 meses.
+
+### 11.4 Qualidade da DIGI dependente do tempo
+As reclamações da DIGI passaram de 3,1× para 1,25× a média dos incumbentes em ~18 meses, enquanto a quota
+quase não mudou (+0,6 p.p.). A qualidade sobe com o tempo desde a entrada, e não com a quota.
+
+### 11.5 Margem dos incumbentes: 40%
+- Margens EBITDA de 2024: NOS 45,3% (EBITDA €767,6 M / receitas €1 696,3 M); MEO 35,8% (EBITDA €994 M /
+  receitas €2 775 M). Média ponderada pelas receitas: 39,4%. A Vodafone Portugal deixou de publicar contas separadas.
+- A margem EBITDA inclui custos fixos, por isso subestima a margem por cliente adicional. Com uma margem por cliente
+  maior, baixar preços custa menos; por isso testa-se também 60%.
+- A recompensa do reforço é a margem e não a receita: com 40% de margem, uma descida de 10% no preço reduz o lucro
+  por cliente em 25% e exige ~33% mais clientes para compensar.
+
+### 11.6 Fim do contrato (em discussão)
+Ver mensagem ao grupo de 29/10: em vez de uma probabilidade fixa ρ, o consumidor decide no fim do contrato.
+
