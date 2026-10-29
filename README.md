@@ -98,6 +98,7 @@ The specification and the log of all decisions with their justification are in
 | Long-run check | `python calibration/calibrate_long.py` | `results/v2/calibration_long.json` |
 | Price scenarios and bandit | `python experiments/run_pricing.py` | `results/pricing/*.csv*` |
 | Analysis | `python analysis/analyze_pricing.py` | `results/pricing/figures`, `results/pricing/tables` |
+| Live view (NetLogo-style window) | `python visualization/live.py` | interactive window; `--gif out.gif` saves an animation |
 
 The calibrated parameters are in `consumer_choice/calibrated.py`; the price policies
 (fixed prices and the epsilon-greedy bandit) are in `consumer_choice/learning.py`.
