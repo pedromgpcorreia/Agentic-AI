@@ -108,7 +108,7 @@ Há três limitações conhecidas, todas documentadas na especificação, e duas
 
 - [x] Desconto de refidelização (D14): 17,8% confirmado e depois revertido para 10% pelo Pedro em 29/10; modelo recalibrado e simulações repetidas
 - [x] 70% de fidelizados no início (D15): aceite pelo Pedro em 29/10
-- [ ] Correr as análises de sensibilidade combinadas: κ 0,10/0,30; saídas 0,3–1%; fidelizados 50–90%; δ; bloqueio vs penalização; margem 60%
+- [x] Correr as análises de sensibilidade: κ 0,10/0,30; saídas 0,3–1%; fidelizados 50–90%; δ 17,8%; bloqueio vs penalização; margem 60% — uma alteração de cada vez, sem recalibrar, 20 corridas por cenário (`experiments/run_sensitivity.py`, `analysis/analyze_sensitivity.py`, resultados em `results/sensitivity/`; ramo `teste`, bandit corrigido). As duas conclusões da tarefa 5 mantêm-se nas 10 variantes
 - [ ] Escrever as secções 3–5 do relatório em inglês
 
 ## Onde está cada coisa
