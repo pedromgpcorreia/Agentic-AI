@@ -215,7 +215,7 @@ pago, % de consumidores fidelizados, receita e margem por operadora, qualidade d
 
 | Pressuposto | Valor | Estado |
 |---|---|---|
-| Fidelizados no início (φ) | 70% | Sem dado público (não consta do relatório *O Sector das Comunicações 2024*); sensibilidade 50–90% |
+| Fidelizados no início (φ) | 70% | Sem dado público (não consta do relatório *O Sector das Comunicações 2024*); aceite pelo Pedro em 29/10; sensibilidade 50–90% |
 | Desconto de refidelização (δ) | 17,8% (calibrado) | Proposto 10%; calibrado para manter 70% fidelizados; confirmado pelo Pedro em 29/10 (secção 11.8) |
 | Heterogeneidade do custo de compromisso | ±50% | Pressuposto; o desvio estimado por Confraria et al. não é significativo |
 
