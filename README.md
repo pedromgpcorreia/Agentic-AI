@@ -6,11 +6,22 @@ This repository contains a Python/Mesa 3 implementation of the **Consumer Choice
 from the NetLogo Models Library (Jager & Wang, 2024), the baseline experiments, their
 statistical analysis and the project report.
 
-Current scope (tasks 1 and 2 of the project):
+> **Para o grupo (PT):** comecem por [`docs/registo_decisoes.md`](docs/registo_decisoes.md) —
+> todas as decisões tomadas nas tarefas 3–5, quem as tomou, a justificação, como reverter,
+> a comparação com o protótipo do Zé e os resultados. Detalhe técnico em
+> [`docs/model_v2_spec.md`](docs/model_v2_spec.md). Para ver o modelo a correr:
+> `pip install "mesa[viz]"` e `solara run visualization/app.py` (browser) ou
+> `python visualization/live.py` (janela).
 
-1. Analyse the model and run it with a basic setup that becomes the baseline.
+Status of the project tasks:
+
+1. Analyse the model and run it with a basic setup that becomes the baseline — done.
 2. Run the simulations for a large number of iterations to obtain statistics for the
-   variables of interest.
+   variables of interest — done.
+3. Fit the model to a real situation (DIGI's entry into the Portuguese bundle market) — done.
+4. Support the model with data and scientific articles — done (see `docs/model_v2_spec.md`).
+5. Extend the model with agent learning (price bandit for the incumbents) — done.
+6. Run the new model and conclude — results done; sensitivity analysis and report sections pending.
 
 ## The model
 
