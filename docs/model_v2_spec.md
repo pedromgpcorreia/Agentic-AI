@@ -215,8 +215,8 @@ pago, % de consumidores fidelizados, receita e margem por operadora, qualidade d
 
 | Pressuposto | Valor | Estado |
 |---|---|---|
-| Fidelizados no início (φ) | 70% | Sem dado público (não consta do relatório *O Sector das Comunicações 2024*); aceite pelo Pedro em 29/10; sensibilidade 50–90% |
-| Desconto de refidelização (δ) | 17,8% (calibrado) | Proposto 10%; calibrado para manter 70% fidelizados; confirmado pelo Pedro em 29/10 (secção 11.8) |
+| Fidelizados no início (φ) | 70% | Ponto de partida, não alvo: a percentagem evolui com as decisões dos consumidores (secção 11.15). Sem dado público; aceite pelo Pedro em 29/10; sensibilidade 50–90% |
+| Desconto de refidelização (δ) | 10% | Decisão do Pedro (29/10, 19:22), depois de testado 17,8%; secções 11.8 e 11.15 |
 | Heterogeneidade do custo de compromisso | ±50% | Pressuposto; o desvio estimado por Confraria et al. não é significativo |
 
 ---
@@ -304,7 +304,7 @@ MEO €66,99, Vodafone €67,50. Na Tabela 20 da ANACOM (dezembro 2024): pacote 
 A NOWO cobrava cerca de metade dos incumbentes e tinha apenas 2,6% de quota: o preço baixo, só por si, não garante
 quota. Este facto reforça os mecanismos do modelo (hábito, norma, contratos e qualidade).
 
-### 11.8 Desconto de refidelização calibrado: δ = 17,8% (em vez de 10%)
+### 11.8 Desconto de refidelização calibrado: δ = 17,8% (em vez de 10%) — SUBSTITUÍDA pela 11.15
 - Problema: com δ = 10% só os consumidores com custo de compromisso abaixo de €4,25 aceitam a refidelização.
   A percentagem de fidelizados desce de 70% para ~35% em dois anos, o que contradiz o valor inicial φ = 70%.
 - Decisão: δ é calibrado para que a percentagem de fidelizados se mantenha em ~70% no mercado sem DIGI
@@ -312,7 +312,7 @@ quota. Este facto reforça os mecanismos do modelo (hábito, norma, contratos e 
 - Justificação: φ e δ não são independentes; fixar os dois sem dados cria uma incoerência. Mantém-se φ (valor de
   partida do grupo) e δ passa a ser consequência. Os descontos de fidelização observados nos tarifários
   (ex.: NOWO €20 nos primeiros 12 meses contra €30 depois, idealista 2024) são da mesma ordem ou superiores.
-- Estado: confirmado pelo Pedro em 29/10. Sensibilidade com δ = 10%, 15% e 20%.
+- Estado: confirmado pelo Pedro em 29/10 e **revertido pelo Pedro no mesmo dia (19:22)**: ver secção 11.15. Os resultados com δ = 17,8% ficam em `results/pricing_delta178/` e no commit e395505.
 
 ### 11.9 Constantes de marca (ASC) por operadora
 - Sem constantes, o modelo não mantém as quotas observadas antes da entrada da DIGI (a norma favorece a maior
@@ -332,7 +332,7 @@ quota. Este facto reforça os mecanismos do modelo (hábito, norma, contratos e 
   0,025 dá 0,23 p.p.). DIGI: 2,53 / 2,85 / 3,14%, dentro do critério de aceitação (3,2% ± 0,5 p.p. no mês 28).
 - Conjunto final em `consumer_choice/calibrated.py`: w = 0,10; ε = 0,03; δ = 0,178; ρ = 0,78; ASC acima.
 
-### 11.11 Contratos iniciais com preço de refidelização: ρ = 78%
+### 11.11 Contratos iniciais com preço de refidelização: ρ = 78% (com δ = 17,8%; com δ = 10%, ρ = 48%, secção 11.15)
 - Problema: no início todos os fidelizados pagavam o preço de tabela. Como 78% dos contratos assinados em regime
   são refidelizações com desconto, o preço médio pago caía de €41,6 para €37,4 em 36 meses. Esta queda é um
   artefacto da inicialização e enviesaria a recompensa das operadoras que aprendem (o lucro cairia mesmo sem
@@ -389,3 +389,36 @@ Ficheiros: `results/pricing/tables/` e `results/pricing/figures/`.
   marcas principais e responderam com marcas low-cost.
 - **Cuidado na leitura:** o horizonte de 10 anos ultrapassa o período com dados (30 meses); os valores de longo prazo
   são comparações entre cenários e não previsões.
+
+### 11.15 Reversão para δ = 10% (decisão do Pedro, 29/10, 19:22)
+- **Decisão:** o desconto de refidelização volta a 10%. Os 70% de fidelizados são apenas o ponto de partida; a
+  percentagem de fidelizados não é um alvo da calibração e evolui com as decisões dos consumidores.
+- **Justificação (Pedro):** o objetivo do modelo é perceber se os consumidores mudam de operadora em função da
+  informação que têm, da rede de amigos, do preço e da qualidade, e não forçar que fiquem. Calibrar δ para manter
+  70% de fidelizados impunha ao modelo um resultado que devia ser consequência do comportamento dos consumidores.
+- **Consequência no modelo sem DIGI:** os fidelizados descem de 70% para ~37% em 2 anos e estabilizam em ~40%.
+  O preço médio pago fica em ~€40,6–40,9 (ARPU de pacotes da ANACOM no 1T2026: €39,59; com δ = 17,8% era €37,1).
+- **Recalibração (todos os outros valores mantêm a lógica das secções 11.9–11.11):**
+  - ρ = 0,48 (ponto fixo com δ = 10%: proporção de refidelizações entre os contratos assinados nos meses 24–72).
+  - Grelha w ∈ {0,08; 0,10; 0,12} × ε ∈ {0,005; 0,01; 0,02; 0,03}, 24 corridas por ponto
+    (`calibration/calibrate_entry.py delta10`, resultados em `results/v2/calibration_entry_delta10.csv`).
+    Melhor: (0,12; 0,005) com RMSE 0,12 p.p.; segundo: (0,10; 0,02) com 0,15 p.p.
+    Escolhe-se (0,10; 0,02): mantém w = 0,10 e dá uma rotação anual mais próxima dos dados (2,7% contra 2,1%).
+  - Constantes de marca: NOS +0,0307; Vodafone +0,0161; NOWO/DIGI −0,0820.
+  - Validação com 48 corridas: DIGI 2,53 / 2,96 / 3,37% nos meses 19 / 25 / 28 (ANACOM 2,8 / 3,0 / 3,2); RMSE 0,18 p.p.
+- **Efeito secundário:** sem DIGI, a deriva das quotas quase desaparece (MEO 41,3% → 40,9% e NOS 35,3% → 35,3%
+  em 60 meses; com δ = 17,8% a MEO ganhava ~3,5 p.p.). A NOWO continua a perder quota sem a entrada (2,8% → 1,5%).
+  A limitação da secção 11.12 sobre a deriva fica muito reduzida.
+
+### 11.16 Resultados das fases 3 e 4 com δ = 10% (substituem os da secção 11.14)
+Mesmo desenho da 11.14 (30 corridas por cenário, mesmos números aleatórios, lucro acumulado em 10 anos).
+Os resultados com δ = 17,8% estão em `results/pricing_delta178/`.
+- Contrafactual sem DIGI: lucro conjunto +11,4% face a "todos ao preço de lista".
+- Descidas comuns: ×0,95 → −9,1%; ×0,90 → −17,5%; ×0,85 → −28,4%; ×0,80 → −41,2%.
+  Quota da DIGI a 10 anos: 22,6% (lista), 16,7%, 7,9%, 1,9%, 0,8%.
+- Descida unilateral a ×0,90: MEO +14,9%, NOS +19,3%, Vodafone +36,2% de lucro próprio. Com δ = 10% os três têm
+  incentivo a desviar (com 17,8% a MEO não tinha): dilema do prisioneiro completo.
+- Bandit (ε = 0,1, α = 0,2): lucro conjunto −3,2%; multiplicador médio 0,97; preço de lista escolhido em 75% (MEO),
+  76% (NOS) e 78% (Vodafone) das decisões dos anos 6–10; DIGI a 10 anos 15,7%.
+- Sensibilidade (9 combinações de ε e α): lucro conjunto entre −1,6% e −5,6%; multiplicador médio entre 0,96 e 0,98.
+- As conclusões qualitativas da 11.14 mantêm-se e ficam mais fortes.

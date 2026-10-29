@@ -5,8 +5,13 @@ For each grid point:
   2. run the model with the DIGI entry and compare the DIGI share with ANACOM data
      (months 19, 25, 28 = Q2 2025, Q4 2025, Q1 2026: 2.8%, 3.0%, 3.2%).
 
-Usage (repository root):  python calibration/calibrate_entry.py [fine]
-Output: results/v2/calibration_entry.csv (or calibration_entry_fine.csv)
+Usage (repository root):  python calibration/calibrate_entry.py [fine | delta10]
+Output: results/v2/calibration_entry.csv (or calibration_entry_fine.csv, calibration_entry_delta10.csv)
+
+delta10 (decided 29/10, 19:22): renewal discount back to 10 %; the 70 % under contract is only
+the starting point and the contracted share evolves with the consumers' decisions.
+initial_renewed = 0.48 = fixed point with delta 10 % (share of renewals among the contracts
+signed in months 24-72 without entry).
 """
 import os
 import sys
@@ -29,7 +34,12 @@ if len(sys.argv) > 1 and sys.argv[1] == "fine":          # second, finer grid ar
     GRID_W = [0.08, 0.10, 0.12, 0.13]
     GRID_E = [0.01, 0.02, 0.03, 0.05]
     OUTFILE = "results/v2/calibration_entry_fine.csv"
-DELTA = 0.178
+DELTA, RHO = 0.178, 0.0
+if len(sys.argv) > 1 and sys.argv[1] == "delta10":
+    GRID_W = [0.08, 0.10, 0.12]
+    GRID_E = [0.005, 0.01, 0.02, 0.03]
+    OUTFILE = "results/v2/calibration_entry_delta10.csv"
+    DELTA, RHO = 0.10, 0.48
 COLS = ["share_MEO", "share_NOS", "share_Vodafone", "share_DIGI"]
 
 
@@ -37,7 +47,8 @@ def pre_entry(args):
     w, e, asc, seed = args
     warnings.filterwarnings("ignore")
     m = TelecomMarketModel(entry_tick=None, norm_influence=w, exploration=e,
-                           brand_constants=asc, renewal_discount=DELTA, rng=seed)
+                           brand_constants=asc, renewal_discount=DELTA, initial_renewed=RHO,
+                           rng=seed)
     for _ in range(24):
         m.step()
     return m.datacollector.get_model_vars_dataframe()[COLS].iloc[12:].mean().values
@@ -47,7 +58,7 @@ def with_entry(args):
     w, e, asc, seed = args
     warnings.filterwarnings("ignore")
     m = TelecomMarketModel(norm_influence=w, exploration=e, brand_constants=asc,
-                           renewal_discount=DELTA, rng=seed)
+                           renewal_discount=DELTA, initial_renewed=RHO, rng=seed)
     for _ in range(30):
         m.step()
     df = m.datacollector.get_model_vars_dataframe()
