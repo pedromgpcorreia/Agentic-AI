@@ -9,10 +9,13 @@ Scenarios (prices of the incumbents from the DIGI entry, month 12):
   * fixed_X           : the three incumbents at X x list price, X in ARMS;
   * solo_OP_X         : only OP cuts to X, the others keep the list price
                         (is keeping the list price a best response?);
-  * bandit_e{eps}_a{alpha}: each incumbent learns its price (epsilon-greedy bandit).
+  * bandit_e{eps}_a{alpha}: each incumbent learns its price (epsilon-greedy bandit);
+  * bandit_p{months}  : main bandit (eps 0.10, alpha 0.2) deciding every 6 or 12 months
+                        instead of 3 (longer reward horizon).
 
-Usage (repository root):  python experiments/run_pricing.py [quick]
-Outputs in results/pricing/: runs.csv (one row per run), series.csv.gz (monthly means),
+Usage (repository root):  python experiments/run_pricing.py [quick] [--out DIR]
+Outputs in results/pricing/ (quick: results/pricing_quick/, so the full results are never
+overwritten by a test run): runs.csv (one row per run), series.csv.gz (monthly means),
 bandit_log.csv.gz (one row per pricing decision).
 """
 import os
@@ -31,8 +34,10 @@ from consumer_choice.telecom import TelecomMarketModel  # noqa: E402
 MONTHS = 132                      # 12 months before the entry + 10 years after
 ENTRY = 12
 OPS = ["MEO", "NOS", "Vodafone", "DIGI"]
-QUICK = len(sys.argv) > 1 and sys.argv[1] == "quick"
+QUICK = "quick" in sys.argv
 SEEDS = range(4000, 4004 if QUICK else 4030)
+OUT = (sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv
+       else "results/pricing_quick" if QUICK else "results/pricing")
 
 
 def scenarios():
@@ -48,7 +53,9 @@ def scenarios():
         for alpha in (0.1, 0.2, 0.4):
             if QUICK and (eps, alpha) != (0.10, 0.2):
                 continue
-            sc[f"bandit_e{eps:.2f}_a{alpha:.1f}"] = dict(policy=("bandit", eps, alpha))
+            sc[f"bandit_e{eps:.2f}_a{alpha:.1f}"] = dict(policy=("bandit", eps, alpha, 3))
+    for period in (6, 12):
+        sc[f"bandit_p{period}"] = dict(policy=("bandit", 0.10, 0.2, period))
     return sc
 
 
@@ -61,7 +68,7 @@ def run(args):
     if pol and pol[0] == "fixed":
         m.price_policy = FixedPricePolicy(pol[1])
     elif pol and pol[0] == "bandit":
-        m.price_policy = BanditPricePolicy(epsilon=pol[1], alpha=pol[2])
+        m.price_policy = BanditPricePolicy(epsilon=pol[1], alpha=pol[2], period=pol[3], seed=seed)
     for _ in range(MONTHS):
         m.step()
     df = m.datacollector.get_model_vars_dataframe()
@@ -83,7 +90,7 @@ def run(args):
 
 
 if __name__ == "__main__":
-    out = "results/pricing"
+    out = OUT
     os.makedirs(out, exist_ok=True)
     jobs = [(n, s, seed) for n, s in scenarios().items() for seed in SEEDS]
     rows, series, logs = [], [], []

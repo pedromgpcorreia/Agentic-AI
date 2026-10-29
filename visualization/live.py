@@ -99,7 +99,7 @@ class LiveView:
         self.model = TelecomMarketModel(entry_tick=int(self.s_entry.val), rng=self.seed, **params)
         pol = self.radio.value_selected
         if pol == POLICIES[1]:
-            self.model.price_policy = BanditPricePolicy()
+            self.model.price_policy = BanditPricePolicy(seed=self.seed)
         elif pol == POLICIES[2]:
             self.model.price_policy = FixedPricePolicy((0.9, 0.9, 0.9))
         self.seed += 1

@@ -12,6 +12,7 @@ model calls at the end of every month.
 Price changes apply to new contracts, renewals and households without a contract;
 households under contract keep the price they signed.
 """
+import random
 
 # price multipliers of the base price (agreed plan): 1.00 = list price before the entry,
 # 0.80 = 20 % cut (EUR 34 for MEO/NOS), still above unit cost (0.60 x base, margin 40 %)
@@ -38,16 +39,22 @@ class BanditPricePolicy:
 
     Reward of a period = profit of the operator summed over the months of the period:
     sum over its customers of (price paid - unit cost). Unit cost = (1 - margin) x base price.
+
+    Each arm is played once, in random order, before the epsilon-greedy rule starts, and
+    its first reward sets its action value; this avoids a tie that would always favour
+    the list price. The policy draws from its own random generator (`seed`), so the
+    consumers' random draws are the same as in the fixed-price scenarios with the same seed.
     """
 
     def __init__(self, epsilon=0.1, alpha=0.2, period=3, arms=ARMS,
-                 learn_before_entry=False):
+                 learn_before_entry=False, seed=None):
         self.epsilon = epsilon
         self.alpha = alpha
         self.period = period
         self.arms = list(arms)
         self.learn_before_entry = learn_before_entry
-        self.q = {k: None for k in INCUMBENTS}          # action values, set on first decision
+        self.random = random.Random(seed)
+        self.q = {k: [None] * len(self.arms) for k in INCUMBENTS}   # None = arm not tried yet
         self.action = {k: 0 for k in INCUMBENTS}        # index of the current arm (0 = base price)
         self.acc = {k: 0.0 for k in INCUMBENTS}          # profit accumulated in the current period
         self.months = 0
@@ -66,24 +73,28 @@ class BanditPricePolicy:
             return
         for k in INCUMBENTS:
             reward = self.acc[k]
-            if self.q[k] is None:
-                # initial values on the scale of the rewards: the profit observed
-                # with the base price (optimistic for lower prices)
-                self.q[k] = [reward] * len(self.arms)
+            q = self.q[k]
             a = self.action[k]
-            self.q[k][a] += self.alpha * (reward - self.q[k][a])
-            if model.random.random() < self.epsilon:
-                new_a = model.random.randrange(len(self.arms))
+            if q[a] is None:
+                q[a] = reward                            # first reward of this arm
+            else:
+                q[a] += self.alpha * (reward - q[a])
+            untried = [i for i, v in enumerate(q) if v is None]
+            if untried:
+                new_a = self.random.choice(untried)
+                explored = True
+            elif self.random.random() < self.epsilon:
+                new_a = self.random.randrange(len(self.arms))
                 explored = True
             else:
-                best = max(self.q[k])
-                new_a = min(i for i, v in enumerate(self.q[k]) if v == best)
+                best = max(q)
+                new_a = self.random.choice([i for i, v in enumerate(q) if v == best])
                 explored = False
             self.log.append({"month": model.steps, "operator": model.names[k],
                              "reward": reward, "previous_arm": self.arms[a],
                              "new_arm": self.arms[new_a], "explored": explored,
                              "price": model.base_price[k] * self.arms[new_a],
-                             **{f"Q_{m:.2f}": v for m, v in zip(self.arms, self.q[k])}})
+                             **{f"Q_{m:.2f}": v for m, v in zip(self.arms, q)}})
             self.action[k] = new_a
             model.price[k] = model.base_price[k] * self.arms[new_a]
             self.acc[k] = 0.0

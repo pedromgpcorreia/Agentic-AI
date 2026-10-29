@@ -120,6 +120,25 @@ def test_price_policies():
         assert any(abs(m.price[k] - m.base_price[k] * a) < 1e-9 for a in ARMS)
     # contracted households keep the price they signed
     assert all(c.contract_price > 0 for c in m.consumers)
+    # every arm is tried once before the epsilon-greedy rule starts
+    for op in ("MEO", "NOS", "Vodafone"):
+        first = [r["new_arm"] for r in pol.log if r["operator"] == op][:len(ARMS) - 1]
+        assert sorted(first + [1.00]) == sorted(ARMS), (op, first)
+
+
+def test_bandit_common_random_numbers():
+    """The bandit draws from its own generator, never from the model's, so the consumers
+    get the same random numbers as in the fixed-price scenarios with the same seed."""
+    from consumer_choice.calibrated import CALIBRATED
+    from consumer_choice.learning import BanditPricePolicy
+    m = TelecomMarketModel(rng=4000, **CALIBRATED)
+    pol = BanditPricePolicy(seed=4000)
+    for _ in range(40):
+        m.step()                            # steps without the policy
+        state = m.random.getstate()
+        pol(m)                              # decisions at months 14, 17, ...
+        assert m.random.getstate() == state
+    assert len(pol.log) > 0
 
 
 if __name__ == "__main__":

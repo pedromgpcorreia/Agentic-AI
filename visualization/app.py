@@ -38,7 +38,7 @@ class LiveTelecomModel(TelecomMarketModel):
             params.pop("brand_constants")      # constants were calibrated for w = 0.10
         super().__init__(entry_tick=int(entry_tick), rng=int(seed), **params)
         if policy == POLICIES[1]:
-            self.price_policy = BanditPricePolicy()
+            self.price_policy = BanditPricePolicy(seed=int(seed))
         elif policy == POLICIES[2]:
             self.price_policy = FixedPricePolicy((0.9, 0.9, 0.9))
 

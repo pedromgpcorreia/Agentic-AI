@@ -4,10 +4,11 @@ Reads results/pricing/ (experiments/run_pricing.py) and writes figures to
 results/pricing/figures and tables to results/pricing/tables.
 All comparisons are paired by seed (common random numbers).
 
-Usage (repository root):  python analysis/analyze_pricing.py
+Usage (repository root):  python analysis/analyze_pricing.py [results folder]
 """
 import json
 import os
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
@@ -17,7 +18,7 @@ import pandas as pd  # noqa: E402
 from scipy import stats  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IN = f"{ROOT}/results/pricing"
+IN = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else f"{ROOT}/results/pricing"
 FIG, TAB = f"{IN}/figures", f"{IN}/tables"
 os.makedirs(FIG, exist_ok=True)
 os.makedirs(TAB, exist_ok=True)
