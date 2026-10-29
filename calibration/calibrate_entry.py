@@ -5,8 +5,8 @@ For each grid point:
   2. run the model with the DIGI entry and compare the DIGI share with ANACOM data
      (months 19, 25, 28 = Q2 2025, Q4 2025, Q1 2026: 2.8%, 3.0%, 3.2%).
 
-Usage (repository root):  python calibration/calibrate_entry.py
-Output: results/v2/calibration_entry.csv
+Usage (repository root):  python calibration/calibrate_entry.py [fine]
+Output: results/v2/calibration_entry.csv (or calibration_entry_fine.csv)
 """
 import os
 import sys
@@ -24,6 +24,11 @@ TARGET_SHARES = np.array([41.8, 35.0, 20.6, 2.6]) / 100
 DIGI_TARGETS = {19: 0.028, 25: 0.030, 28: 0.032}
 GRID_W = [0.10, 0.15, 0.25, 0.40]
 GRID_E = [0.0025, 0.005, 0.01, 0.02]
+OUTFILE = "results/v2/calibration_entry.csv"
+if len(sys.argv) > 1 and sys.argv[1] == "fine":          # second, finer grid around the best point
+    GRID_W = [0.08, 0.10, 0.12, 0.13]
+    GRID_E = [0.01, 0.02, 0.03, 0.05]
+    OUTFILE = "results/v2/calibration_entry_fine.csv"
 DELTA = 0.178
 COLS = ["share_MEO", "share_NOS", "share_Vodafone", "share_DIGI"]
 
@@ -73,4 +78,4 @@ if __name__ == "__main__":
                        "exit_at_contract_end": res[:, 4].mean()}
                 rows.append(row)
                 print({k: round(v, 4) for k, v in row.items()}, flush=True)
-                pd.DataFrame(rows).to_csv("results/v2/calibration_entry.csv", index=False)
+                pd.DataFrame(rows).to_csv(OUTFILE, index=False)

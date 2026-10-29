@@ -216,7 +216,7 @@ pago, % de consumidores fidelizados, receita e margem por operadora, qualidade d
 | Pressuposto | Valor | Estado |
 |---|---|---|
 | Fidelizados no início (φ) | 70% | Sem dado público (não consta do relatório *O Sector das Comunicações 2024*); sensibilidade 50–90% |
-| Desconto de refidelização (δ) | 10% | Decisão do grupo; sensibilidade 5–20% (secção 11.6) |
+| Desconto de refidelização (δ) | 17,8% (calibrado) | Proposto 10%; calibrado para manter 70% fidelizados (secção 11.8) |
 | Heterogeneidade do custo de compromisso | ±50% | Pressuposto; o desvio estimado por Confraria et al. não é significativo |
 
 ---
@@ -303,3 +303,89 @@ Tabela do idealista (janeiro 2024, pacotes com telemóvel): NOWO €30/mês (€
 MEO €66,99, Vodafone €67,50. Na Tabela 20 da ANACOM (dezembro 2024): pacote 4P NOWO €36,25 contra ~€56 dos incumbentes.
 A NOWO cobrava cerca de metade dos incumbentes e tinha apenas 2,6% de quota: o preço baixo, só por si, não garante
 quota. Este facto reforça os mecanismos do modelo (hábito, norma, contratos e qualidade).
+
+### 11.8 Desconto de refidelização calibrado: δ = 17,8% (em vez de 10%)
+- Problema: com δ = 10% só os consumidores com custo de compromisso abaixo de €4,25 aceitam a refidelização.
+  A percentagem de fidelizados desce de 70% para ~35% em dois anos, o que contradiz o valor inicial φ = 70%.
+- Decisão: δ é calibrado para que a percentagem de fidelizados se mantenha em ~70% no mercado sem DIGI
+  (`calibration/calibrate_pre_entry.py`). Resultado: δ = 0,178 (€7,56 de desconto no preço da MEO).
+- Justificação: φ e δ não são independentes; fixar os dois sem dados cria uma incoerência. Mantém-se φ (valor de
+  partida do grupo) e δ passa a ser consequência. Os descontos de fidelização observados nos tarifários
+  (ex.: NOWO €20 nos primeiros 12 meses contra €30 depois, idealista 2024) são da mesma ordem ou superiores.
+- Estado: proposta comunicada ao grupo em 29/10; aguarda confirmação. Sensibilidade com δ = 10%, 15% e 20%.
+
+### 11.9 Constantes de marca (ASC) por operadora
+- Sem constantes, o modelo não mantém as quotas observadas antes da entrada da DIGI (a norma favorece a maior
+  operadora). Constantes por alternativa são prática habitual em modelos de escolha discreta.
+- São calibradas para que, sem DIGI, as quotas médias fiquem nas da ANACOM (3T2024). MEO é a referência (0).
+- Valores finais (para w = 0,10): NOS +0,0280; Vodafone +0,0168; NOWO/DIGI −0,0837.
+- A constante da posição 3 passa da NOWO para a DIGI. Pressuposto: a DIGI herda a posição de marca da NOWO;
+  a diferença entre as duas é captada pelo preço e pela qualidade.
+
+### 11.10 Peso da norma (w) e exploração (ε)
+- Grelha grossa: w ∈ {0,10; 0,15; 0,25; 0,40} × ε ∈ {0,0025; 0,005; 0,01; 0,02}. Com w ≥ 0,25 a DIGI chega a 11–25%,
+  porque o peso do preço θ está ligado a w (secção 4). Com w = 0,15 a DIGI cresce demasiado depressa.
+- Grelha fina: w ∈ {0,08; 0,10; 0,12; 0,13} × ε ∈ {0,01; 0,02; 0,03; 0,05}, 24 corridas por ponto.
+  Melhor ponto: w = 0,10, ε = 0,02 (DIGI 2,76 / 3,06 / 3,38% nos meses 19 / 25 / 28; RMSE 0,11 p.p.).
+  Resultados em `results/v2/calibration_entry.csv` e `calibration_entry_fine.csv`.
+- Depois da correção da secção 11.11, ε passa para 0,03 (RMSE 0,18 p.p. com 48 corridas; 0,02 dá 0,36 p.p.;
+  0,025 dá 0,23 p.p.). DIGI: 2,53 / 2,85 / 3,14%, dentro do critério de aceitação (3,2% ± 0,5 p.p. no mês 28).
+- Conjunto final em `consumer_choice/calibrated.py`: w = 0,10; ε = 0,03; δ = 0,178; ρ = 0,78; ASC acima.
+
+### 11.11 Contratos iniciais com preço de refidelização: ρ = 78%
+- Problema: no início todos os fidelizados pagavam o preço de tabela. Como 78% dos contratos assinados em regime
+  são refidelizações com desconto, o preço médio pago caía de €41,6 para €37,4 em 36 meses. Esta queda é um
+  artefacto da inicialização e enviesaria a recompensa das operadoras que aprendem (o lucro cairia mesmo sem
+  mudança de preço).
+- Decisão: 78% dos contratos iniciais têm o preço com desconto. O valor é o ponto fixo do modelo: a proporção de
+  refidelizações entre os contratos assinados nos meses 24–72 (`calibration/calibrate_long.py`).
+- Resultado: preço médio pago estável (€37,6 no mês 0 e no mês 12; €37,0 no mês 72). Referência: ARPU de pacotes
+  da ANACOM no 1T2026, €39,59.
+
+### 11.12 Limitações encontradas na calibração
+- **Deriva lenta das quotas sem DIGI.** Em 72 meses a MEO passa de 42,5% para 46%, a NOS de 34% para 31% e a NOWO
+  de 2,6% para 1,5%; a percentagem de fidelizados sobe de 69% para 78%. A causa é o reforço da norma (a maior
+  operadora atrai mais). Tentou-se calibrar as constantes para o longo prazo (`calibrate_long.py`), mas o
+  processo oscilou entre MEO e NOS: o equilíbrio de longo prazo é muito sensível à diferença entre as constantes.
+  Decisão: manter a calibração de curto prazo (válida para o período com dados, meses 0–30) e comparar todos os
+  cenários com o contrafactual sem DIGI e com os mesmos números aleatórios. A deriva é comum a todos os cenários.
+- **Mudanças no fim do contrato.** No modelo ~0,6–1% dos consumidores mudam de operadora no fim do contrato; Confraria
+  et al. estimam 13,6% (rede móvel, 2014). A rotação anual do modelo é ~2–3%. O modelo subestima a mobilidade; a
+  entrada da DIGI é lenta no modelo como na realidade, mas por um canal de mudança mais estreito. Fica como limitação.
+
+### 11.13 Desenho da aprendizagem (tarefa 5)
+- Braços de preço: ×{1,00; 0,95; 0,90; 0,85; 0,80} do preço de lista (plano acordado). O braço mais baixo (€34 para
+  MEO/NOS) fica acima do custo unitário (60% do preço de lista), por isso nenhum braço dá prejuízo por cliente.
+- Decisão de 3 em 3 meses: as operadoras não mudam preços todos os meses; com contratos de 24 meses o efeito de uma
+  mudança de preço só aparece nos clientes novos, renovações e sem contrato.
+- Valores iniciais: o lucro do primeiro trimestre com o preço de lista, para todos os braços. Como o lucro cai com
+  a entrada da DIGI, os braços ainda não testados ficam acima do braço atual: isto obriga a experimentar todos os
+  braços no início (valores iniciais otimistas, Sutton & Barto, 2018, sec. 2.6).
+- Passo constante α (e não média simples): o ambiente não é estacionário (as outras operadoras também aprendem e a
+  qualidade da DIGI melhora).
+- Horizonte: 120 meses depois da entrada (40 decisões). Resultados lidos a 5 e a 10 anos.
+- Cenários de referência com os mesmos números aleatórios: sem DIGI; os três incumbentes a ×1,00 … ×0,80;
+  um incumbente sozinho a ×0,90 ou ×0,80 (testa se manter o preço de lista é a melhor resposta).
+- Sensibilidade: ε ∈ {0,05; 0,10; 0,20} × α ∈ {0,1; 0,2; 0,4}; 30 corridas por cenário.
+
+### 11.14 Resultados das fases 3 e 4 (30 corridas por cenário, mesmos números aleatórios)
+Lucro acumulado nos 10 anos depois da entrada; diferenças em % face a "todos ao preço de lista" (pareadas por seed).
+Ficheiros: `results/pricing/tables/` e `results/pricing/figures/`.
+- **Contrafactual sem DIGI:** lucro conjunto dos incumbentes +9,4%. A entrada custa ~9% do lucro com preços fixos.
+- **Descidas comuns:** todos a 0,95 → −9,3%; 0,90 → −18,7%; 0,80 → −44,0%. Travam a DIGI (quota a 10 anos de 18,7%
+  com preços de lista para 6,3% a 0,90 e 0,7% a 0,80), mas não compensam em lucro.
+- **Descida unilateral (melhor resposta):** NOS sozinha a 0,90 → +26,5% de lucro para a NOS; Vodafone sozinha a 0,90 → +29,3%;
+  MEO sozinha a 0,90 → −0,9%. Manter o preço de lista não é um equilíbrio para a NOS nem para a Vodafone: há incentivo
+  a desviar (dilema do prisioneiro). A MEO, líder, não ganha com a descida.
+- **Preços aprendidos (bandit, ε = 0,1, α = 0,2):** multiplicador médio 0,95; nos anos 6–10 o preço de lista é escolhido em 77% (MEO),
+  63% (NOS) e 68% (Vodafone) das decisões. Lucro conjunto −6,0% face ao preço de lista, acima de qualquer descida comum ≥ 5%.
+  Quota da DIGI a 10 anos: 10,6%.
+- **Sensibilidade:** com as nove combinações (ε, α) o lucro conjunto fica entre −3,2% e −9,3% e o multiplicador médio
+  entre 0,94 e 0,97. Um α maior (esquece mais depressa) leva a preços mais altos e mais lucro. As conclusões não
+  dependem da escolha de (ε, α).
+- **Interpretação:** os algoritmos não comunicam, mas acabam perto do preço de lista: os ensaios de descida coincidem
+  com a perda de lucro causada pela entrada, e a punição implícita (os outros também descem) torna as descidas pouco
+  rentáveis. É compatível com Calvano et al. (2020) e com o comportamento observado: os incumbentes não baixaram as
+  marcas principais e responderam com marcas low-cost.
+- **Cuidado na leitura:** o horizonte de 10 anos ultrapassa o período com dados (30 meses); os valores de longo prazo
+  são comparações entre cenários e não previsões.

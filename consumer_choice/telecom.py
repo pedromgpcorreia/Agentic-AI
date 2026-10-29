@@ -155,7 +155,7 @@ class TelecomMarketModel(mesa.Model):
                  norm_influence=0.15, information_exchange=0.05, exploration=0.01,
                  price_weight=None,
                  # contracts
-                 contracts=True, exit_rule="penalty", initial_contracted=0.7,
+                 contracts=True, exit_rule="penalty", initial_contracted=0.7, initial_renewed=0.0,
                  renewal_discount=0.10, commit_cost_mean=5.25, commit_cost_spread=0.5,
                  # DIGI entry
                  entry_tick=12, digi_price=22.00, digi_contract=3,
@@ -184,6 +184,7 @@ class TelecomMarketModel(mesa.Model):
         self.contracts = contracts
         self.exit_rule = exit_rule
         self.renewal_discount = renewal_discount
+        self.initial_renewed = initial_renewed
         self.commit_cost_mean = commit_cost_mean
         self.commit_cost_spread = commit_cost_spread
         self.entry_tick = entry_tick
@@ -253,6 +254,11 @@ class TelecomMarketModel(mesa.Model):
             c.contract_elapsed = self.random.randrange(length)
             c.contract_left = length - c.contract_elapsed
         c.contract_price = self.price[c.choice]
+        # share of the initial contracts that are renewals (discounted price); without it
+        # the average price paid drifts down during the first contract cycle
+        if c.contract_left > 0 and self.initial_renewed > 0 and self.offers_renewal[c.choice]:
+            if self.random.random() < self.initial_renewed:
+                c.contract_price = self.price[c.choice] * (1 - self.renewal_discount)
 
     def build_network(self, avg_connections):
         """Baseline rule: link a random consumer to its nearest unlinked consumer."""

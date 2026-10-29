@@ -98,6 +98,30 @@ def test_renewal_rule():
     assert c.contract_left == 0 and c.contract_price == 42.49
 
 
+def test_price_policies():
+    """Fixed policy applies once at entry; bandit decides every 3 months with valid arms."""
+    from consumer_choice.calibrated import CALIBRATED
+    from consumer_choice.learning import ARMS, BanditPricePolicy, FixedPricePolicy
+    m = TelecomMarketModel(rng=5, **CALIBRATED)
+    m.price_policy = FixedPricePolicy((0.9, 1.0, 0.8))
+    for _ in range(14):
+        m.step()
+    assert abs(m.price[0] - 0.9 * 42.49) < 1e-9 and m.price[1] == 42.49
+    assert abs(m.price[2] - 0.8 * 40.50) < 1e-9 and m.price[3] == 22.00
+    m = TelecomMarketModel(rng=5, **CALIBRATED)
+    pol = BanditPricePolicy()
+    m.price_policy = pol
+    for _ in range(36):
+        m.step()
+    months = sorted({r["month"] for r in pol.log})
+    assert months == [14, 17, 20, 23, 26, 29, 32, 35], months   # entry month 12 = first month of quarter 1
+    assert all(r["new_arm"] in ARMS for r in pol.log)
+    for k in range(3):
+        assert any(abs(m.price[k] - m.base_price[k] * a) < 1e-9 for a in ARMS)
+    # contracted households keep the price they signed
+    assert all(c.contract_price > 0 for c in m.consumers)
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):
