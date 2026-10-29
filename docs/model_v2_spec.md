@@ -216,7 +216,7 @@ pago, % de consumidores fidelizados, receita e margem por operadora, qualidade d
 | Pressuposto | Valor | Estado |
 |---|---|---|
 | Fidelizados no início (φ) | 70% | Sem dado público (não consta do relatório *O Sector das Comunicações 2024*); sensibilidade 50–90% |
-| Desconto de refidelização (δ) | 17,8% (calibrado) | Proposto 10%; calibrado para manter 70% fidelizados (secção 11.8) |
+| Desconto de refidelização (δ) | 17,8% (calibrado) | Proposto 10%; calibrado para manter 70% fidelizados; confirmado pelo Pedro em 29/10 (secção 11.8) |
 | Heterogeneidade do custo de compromisso | ±50% | Pressuposto; o desvio estimado por Confraria et al. não é significativo |
 
 ---
@@ -312,7 +312,7 @@ quota. Este facto reforça os mecanismos do modelo (hábito, norma, contratos e 
 - Justificação: φ e δ não são independentes; fixar os dois sem dados cria uma incoerência. Mantém-se φ (valor de
   partida do grupo) e δ passa a ser consequência. Os descontos de fidelização observados nos tarifários
   (ex.: NOWO €20 nos primeiros 12 meses contra €30 depois, idealista 2024) são da mesma ordem ou superiores.
-- Estado: proposta comunicada ao grupo em 29/10; aguarda confirmação. Sensibilidade com δ = 10%, 15% e 20%.
+- Estado: confirmado pelo Pedro em 29/10. Sensibilidade com δ = 10%, 15% e 20%.
 
 ### 11.9 Constantes de marca (ASC) por operadora
 - Sem constantes, o modelo não mantém as quotas observadas antes da entrada da DIGI (a norma favorece a maior
