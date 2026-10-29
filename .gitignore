@@ -13,3 +13,6 @@ venv/
 
 # Word temporary files
 ~$*.docx
+
+# Test runs (quick mode)
+results/*_quick/

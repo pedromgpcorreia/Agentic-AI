@@ -192,7 +192,8 @@ pago, % de consumidores fidelizados, receita e margem por operadora, qualidade d
   Custo unitário = 60% do preço base (margem de 40%, a partir das margens EBITDA de 2024: NOS 45,3%, MEO 35,8%;
   sensibilidade 40% e 60%; ver secção 11).
   A recompensa é a margem e não a receita, por ser o objetivo das empresas.
-- Método: bandit ε-greedy com passo constante (α = 0,2; ε = 0,1), valores iniciais na escala das recompensas (Sutton & Barto, 2018).
+- Método: bandit ε-greedy com passo constante (α = 0,2; ε = 0,1); cada braço é experimentado uma vez, por ordem
+  aleatória, e a sua primeira recompensa é o valor inicial (Sutton & Barto, 2018); gerador aleatório próprio (secção 11.17).
 - Referência de comparação: os cenários de preço fixo da fase 3.
 - Validação qualitativa: na realidade os incumbentes não baixaram os preços das marcas principais e responderam com
   marcas low-cost (Uzo, Woo, Amigo, a €25 no barómetro de outubro 2025).
@@ -358,9 +359,9 @@ quota. Este facto reforça os mecanismos do modelo (hábito, norma, contratos e 
   MEO/NOS) fica acima do custo unitário (60% do preço de lista), por isso nenhum braço dá prejuízo por cliente.
 - Decisão de 3 em 3 meses: as operadoras não mudam preços todos os meses; com contratos de 24 meses o efeito de uma
   mudança de preço só aparece nos clientes novos, renovações e sem contrato.
-- Valores iniciais: o lucro do primeiro trimestre com o preço de lista, para todos os braços. Como o lucro cai com
-  a entrada da DIGI, os braços ainda não testados ficam acima do braço atual: isto obriga a experimentar todos os
-  braços no início (valores iniciais otimistas, Sutton & Barto, 2018, sec. 2.6).
+- Valores iniciais (versão original, substituída na secção 11.17): o lucro do primeiro trimestre com o preço de lista,
+  para todos os braços. Como o lucro cai com a entrada da DIGI, os braços ainda não testados ficam acima do braço
+  atual: isto obriga a experimentar todos os braços no início (valores iniciais otimistas, Sutton & Barto, 2018, sec. 2.6).
 - Passo constante α (e não média simples): o ambiente não é estacionário (as outras operadoras também aprendem e a
   qualidade da DIGI melhora).
 - Horizonte: 120 meses depois da entrada (40 decisões). Resultados lidos a 5 e a 10 anos.
@@ -422,3 +423,38 @@ Os resultados com δ = 17,8% estão em `results/pricing_delta178/`.
   76% (NOS) e 78% (Vodafone) das decisões dos anos 6–10; DIGI a 10 anos 15,7%.
 - Sensibilidade (9 combinações de ε e α): lucro conjunto entre −1,6% e −5,6%; multiplicador médio entre 0,96 e 0,98.
 - As conclusões qualitativas da 11.14 mantêm-se e ficam mais fortes.
+
+### 11.17 Correção do bandit (revisão de 29/10; substitui os resultados do bandit da 11.16)
+- **Problema 1, ordem dos ensaios.** Com todos os valores iniciais iguais, o empate ia sempre para o primeiro braço
+  (×1,00) e os braços seguintes eram experimentados sempre pela mesma ordem, de ×0,95 a ×0,80. Como o lucro cai com o
+  crescimento da DIGI, os preços mais baixos eram avaliados mais tarde, num mercado pior, e pareciam piores.
+  Correção: cada braço é experimentado uma vez, por ordem aleatória, e a primeira recompensa é o seu valor inicial;
+  depois, ε-greedy com passo constante; empates resolvidos ao acaso.
+- **Problema 2, números aleatórios comuns.** O bandit sorteava com o gerador do modelo, por isso a partir da primeira
+  decisão os consumidores recebiam números aleatórios diferentes dos cenários de preço fixo (contra a decisão D22).
+  Correção: `BanditPricePolicy(seed=...)` tem um gerador próprio; `run_pricing.py` usa a seed da corrida. Teste:
+  `test_bandit_common_random_numbers`.
+- **Horizonte.** Novos cenários com decisões de 6 e 12 meses (`bandit_p6`, `bandit_p12`).
+- **Resultados (δ = 10%, 30 corridas, `results/pricing/`; os anteriores ficam em `results/pricing_bandit_v1/`):**
+  - Bandit (ε = 0,1, α = 0,2): lucro conjunto −2,4% (IC 95% −3,5 a −1,3); multiplicador médio 0,98; preço de lista
+    escolhido em 85% (MEO), 88% (NOS) e 88% (Vodafone) das decisões dos anos 6–10; DIGI a 10 anos 18,1%.
+  - 9 combinações de ε e α: lucro conjunto entre −2,3% e −4,4%; multiplicador médio entre 0,97 e 0,98.
+  - Decisão de 6 em 6 meses: −3,9%, multiplicador 0,97, DIGI 16,3%. De 12 em 12 meses: −7,5%, multiplicador 0,94,
+    DIGI 12,4%. Com um horizonte mais longo as descidas compensam mais, porque os clientes ganhos chegam ao longo de
+    contratos de 24 meses.
+  - Os cenários de preço fixo, de descida unilateral e sem DIGI não usam o bandit e não mudam.
+- **Leitura.** As conclusões da 11.16 mantêm-se. O bandit não observa os preços dos rivais, por isso a proximidade ao
+  preço de lista vem sobretudo do horizonte curto da recompensa e não de uma estratégia de conluio aprendida, como em
+  Calvano et al. (2020).
+
+### 11.18 Análise de sensibilidade (tarefa 6)
+- Uma alteração de cada vez ao modelo calibrado, sem recalibrar: κ 0,10 / 0,30; saídas 0,3% / 1% por mês; fidelizados
+  no início 50% / 90%; δ 17,8%; bloqueio total; margem 60%. Em cada variante: todos ao preço de lista, cada incumbente
+  sozinho a ×0,90 e o bandit corrigido; 20 corridas por cenário, mesmos números aleatórios
+  (`experiments/run_sensitivity.py`, `analysis/analyze_sensitivity.py`, `results/sensitivity/`).
+- Baixar sozinho compensa a pelo menos um incumbente nas 10 variantes (NOS +9,8% a +38,7%; Vodafone +22,3% a +64,4%);
+  a única descida que não compensa é a da MEO com κ = 0,30 (−3,0%), porque é a de melhor qualidade.
+- O bandit fica perto do preço de lista em todas: multiplicador 0,97–0,98, lucro conjunto −0,2% a −4,1%.
+- Mais saídas (mais famílias novas sem contrato) e margem maior tornam as descidas mais rentáveis.
+- Sem recalibração a quota da DIGI no mês 28 afasta-se dos dados em algumas variantes (4,85% com κ = 0,10; 2,24% com
+  κ = 0,30; ANACOM 3,2%): a análise mede a robustez das conclusões, não o ajuste aos dados.

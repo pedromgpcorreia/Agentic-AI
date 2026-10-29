@@ -10,7 +10,7 @@ statistical analysis and the project report.
 > todas as decisões tomadas nas tarefas 3–5, quem as tomou, a justificação, como reverter,
 > a comparação com o protótipo do Zé e os resultados. Detalhe técnico em
 > [`docs/model_v2_spec.md`](docs/model_v2_spec.md). Para ver o modelo a correr:
-> `pip install "mesa[viz]"` e `solara run visualization/app.py` (browser) ou
+> `pip install "mesa[viz,network]"` e `solara run visualization/app.py` (browser) ou
 > `python visualization/live.py` (janela).
 
 Status of the project tasks:
@@ -21,7 +21,7 @@ Status of the project tasks:
 3. Fit the model to a real situation (DIGI's entry into the Portuguese bundle market) — done.
 4. Support the model with data and scientific articles — done (see `docs/model_v2_spec.md`).
 5. Extend the model with agent learning (price bandit for the incumbents) — done.
-6. Run the new model and conclude — results done; sensitivity analysis and report sections pending.
+6. Run the new model and conclude — results and sensitivity analysis done; report sections pending.
 
 ## The model
 
@@ -107,13 +107,18 @@ The specification and the log of all decisions with their justification are in
 | Pre-entry calibration | `python calibration/calibrate_pre_entry.py` | `results/v2/calibration_pre_entry.json` |
 | Entry calibration | `python calibration/calibrate_entry.py [fine]` | `results/v2/calibration_entry*.csv` |
 | Long-run check | `python calibration/calibrate_long.py` | `results/v2/calibration_long.json` |
-| Price scenarios and bandit | `python experiments/run_pricing.py` | `results/pricing/*.csv*` |
-| Analysis | `python analysis/analyze_pricing.py` | `results/pricing/figures`, `results/pricing/tables` |
-| Mesa browser interface (SolaraViz) | `pip install "mesa[viz]"`, then `solara run visualization/app.py` | web page at http://localhost:8765 |
+| Price scenarios and bandit | `python experiments/run_pricing.py` (`quick`: 4 seeds, writes `results/pricing_quick/`) | `results/pricing/*.csv*` |
+| Analysis | `python analysis/analyze_pricing.py [folder]` | `results/pricing/figures`, `results/pricing/tables` |
+| Sensitivity analysis (task 6) | `python experiments/run_sensitivity.py` | `results/sensitivity/runs.csv` |
+| Sensitivity tables and figure | `python analysis/analyze_sensitivity.py [folder]` | `results/sensitivity/tables`, `results/sensitivity/figures` |
+| Mesa browser interface (SolaraViz) | `pip install "mesa[viz,network]"`, then `solara run visualization/app.py` | web page at http://localhost:8765 |
 | Live view (NetLogo-style window) | `python visualization/live.py` | interactive window; `--gif out.gif` saves an animation |
 
 The calibrated parameters are in `consumer_choice/calibrated.py`; the price policies
 (fixed prices and the epsilon-greedy bandit) are in `consumer_choice/learning.py`.
+`results/pricing/` holds the results of the current code. Earlier versions are kept for
+comparison: `results/pricing_bandit_v1/` (bandit before the correction of decision D23) and
+`results/pricing_delta178/` (renewal discount 17.8 %).
 
 ## Report
 

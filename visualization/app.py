@@ -3,7 +3,7 @@
 This is the Mesa equivalent of the NetLogo interface: sliders and Reset / Play / Step
 buttons on the left, the consumers' network and the plots on the right, in a web page.
 
-Install once:   python -m pip install "mesa[viz]>=3.5,<4"
+Install once:   python -m pip install "mesa[viz,network]>=3.5,<4"
 Run:            solara run visualization/app.py      (repository root; opens http://localhost:8765)
 
 The window version without a browser is visualization/live.py (only needs matplotlib).

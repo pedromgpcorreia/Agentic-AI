@@ -35,7 +35,7 @@ O modelo atual mantém a regra de decisão do baseline (hábito → exploração
 
 ## Registo de decisões
 
-Foram tomadas 22 decisões de modelação; todas estão fechadas. Ordem: estrutura, mercado, contratos, população, tarefa 5.
+Foram tomadas 23 decisões de modelação; a D23 (correção do bandit) ainda tem de ser validada pelo grupo. Ordem: estrutura, mercado, contratos, população, tarefa 5.
 
 | # | Decisão | Quem | Justificação | Como reverter |
 | --- | --- | --- | --- | --- |
@@ -61,6 +61,7 @@ Foram tomadas 22 decisões de modelação; todas estão fechadas. Ordem: estrutu
 | D20 | A aprendizagem começa na entrada da DIGI e só nos incumbentes; a DIGI mantém €22 | Pedro | A pergunta é como os incumbentes reagem à entrada | `learn_before_entry` |
 | D21 | Bandit ε-greedy: ε = 0,1, α = 0,2, decisão de 3 em 3 meses, braços ×{1,00; 0,95; 0,90; 0,85; 0,80} | Proposta técnica, aceite (plano de 29/10) | α e período iguais ao protótipo; braços relativos ao preço de cada operadora; o mais baixo fica acima do custo | `BanditPricePolicy(...)` |
 | D22 | Comparar o bandit com cenários de preço fixo e com o cenário sem DIGI, com os mesmos números aleatórios | Proposta técnica, aceite (plano de 29/10) | Isola o efeito da aprendizagem do ruído da simulação | — |
+| D23 | Correção do bandit: cada braço é experimentado uma vez, por ordem aleatória, antes do ε-greedy; empates resolvidos ao acaso; o bandit usa um gerador aleatório próprio | Proposta técnica (revisão de 29/10), por validar | Antes, os braços eram experimentados sempre de ×0,95 para ×0,80; como o lucro cai com a entrada da DIGI, os preços baixos eram avaliados mais tarde e pareciam piores. E o bandit gastava números aleatórios dos consumidores, o que contrariava a D22 | `results/pricing_bandit_v1/` (resultados) e commit 7624b5b (código) |
 
 ## Valores calibrados
 
@@ -78,23 +79,26 @@ Sem DIGI, os fidelizados descem de 70% para ~37% em 2 anos e estabilizam em ~40%
 
 ## Resultados da tarefa 5
 
-Quando aprendem os preços, os incumbentes acabam perto do preço de lista sem comunicarem entre si, embora cada um ganhe se baixar sozinho. Valores com δ = 10% (versão de 29/10, 19:22): 30 corridas por cenário, lucro acumulado em 10 anos após a entrada, comparado com "todos ao preço de lista".
+Quando aprendem os preços, os incumbentes acabam perto do preço de lista sem comunicarem entre si, embora cada um ganhe se baixar sozinho. Valores com δ = 10% e o bandit corrigido (D23): 30 corridas por cenário, lucro acumulado em 10 anos após a entrada, comparado com "todos ao preço de lista".
 
 | Cenário | Lucro conjunto dos incumbentes | Quota da DIGI a 10 anos |
 | --- | --- | --- |
 | Sem DIGI (contrafactual) | +11,4% | — |
 | Todos ao preço de lista | referência | 22,6% |
-| Preços aprendidos (bandit, ε = 0,1, α = 0,2) | −3,2% | 15,7% |
+| Preços aprendidos (bandit, ε = 0,1, α = 0,2, decisão de 3 em 3 meses) | −2,4% | 18,1% |
+| Preços aprendidos, decisão de 6 em 6 meses | −3,9% | 16,3% |
+| Preços aprendidos, decisão de 12 em 12 meses | −7,5% | 12,4% |
 | Todos a ×0,95 | −9,1% | 16,7% |
 | Todos a ×0,90 | −17,5% | 7,9% |
 | Todos a ×0,85 | −28,4% | 1,9% |
 | Todos a ×0,80 | −41,2% | 0,8% |
 
 - **Baixar sozinho compensa a todos.** Sozinha a ×0,90, a MEO ganha +14,9% de lucro, a NOS +19,3% e a Vodafone +36,2%. Manter o preço de lista não é um equilíbrio para nenhum dos três: é um dilema do prisioneiro. Com δ = 17,8% a MEO não ganhava.
-- **O bandit volta ao preço de lista.** Nos anos 6–10, o preço de lista é escolhido em 75% (MEO), 76% (NOS) e 78% (Vodafone) das decisões. O multiplicador médio é 0,97.
-- **Robusto aos parâmetros do bandit.** Nas 9 combinações de ε ∈ {0,05; 0,10; 0,20} e α ∈ {0,1; 0,2; 0,4}, o lucro conjunto fica entre −1,6% e −5,6% e o multiplicador médio entre 0,96 e 0,98.
-- **As conclusões não dependem de δ.** Com 17,8% os números eram outros (bandit −6,0%, DIGI a 10 anos 10,6%), mas a ordem dos cenários e o dilema do prisioneiro eram os mesmos.
-- **Leitura.** É o resultado de Calvano et al. (2020): algoritmos independentes chegam a preços acima do competitivo. Coincide com o observado: os incumbentes não baixaram as marcas principais e responderam com marcas low-cost (Uzo, Woo, Amigo).
+- **O bandit volta ao preço de lista.** Nos anos 6–10, o preço de lista é escolhido em 85% (MEO), 88% (NOS) e 88% (Vodafone) das decisões. O multiplicador médio é 0,98.
+- **Robusto aos parâmetros do bandit.** Nas 9 combinações de ε ∈ {0,05; 0,10; 0,20} e α ∈ {0,1; 0,2; 0,4}, o lucro conjunto fica entre −2,3% e −4,4% e o multiplicador médio entre 0,97 e 0,98.
+- **O horizonte da decisão conta.** Com decisões de 12 em 12 meses os incumbentes baixam mais (multiplicador 0,94) e a DIGI cresce menos. Com decisões de 3 em 3 meses, uma descida reduz logo a margem, mas os clientes ganhos chegam ao longo de contratos de 24 meses.
+- **Versões anteriores.** Com o bandit antes da D23: −3,2% e DIGI 15,7% (`results/pricing_bandit_v1/`). Com δ = 17,8%: −6,0% e DIGI 10,6% (`results/pricing_delta178/`). A ordem dos cenários e o dilema do prisioneiro mantêm-se em todas.
+- **Leitura.** É compatível com Calvano et al. (2020): algoritmos independentes ficam acima do preço competitivo. Mas este bandit não observa os preços dos rivais, por isso o resultado vem sobretudo da recompensa de curto prazo, e não de uma estratégia de conluio aprendida. Coincide com o observado: os incumbentes não baixaram as marcas principais e responderam com marcas low-cost (Uzo, Woo, Amigo).
 
 Figuras em `results/pricing/figures/`: quota da DIGI, preços aprendidos, lucro por cenário.
 
@@ -108,7 +112,7 @@ Há três limitações conhecidas, todas documentadas na especificação, e duas
 
 - [x] Desconto de refidelização (D14): 17,8% confirmado e depois revertido para 10% pelo Pedro em 29/10; modelo recalibrado e simulações repetidas
 - [x] 70% de fidelizados no início (D15): aceite pelo Pedro em 29/10
-- [x] Correr as análises de sensibilidade: κ 0,10/0,30; saídas 0,3–1%; fidelizados 50–90%; δ 17,8%; bloqueio vs penalização; margem 60% — uma alteração de cada vez, sem recalibrar, 20 corridas por cenário (`experiments/run_sensitivity.py`, `analysis/analyze_sensitivity.py`, resultados em `results/sensitivity/`; ramo `teste`, bandit corrigido). As duas conclusões da tarefa 5 mantêm-se nas 10 variantes
+- [x] Correr as análises de sensibilidade: κ 0,10/0,30; saídas 0,3–1%; fidelizados 50–90%; δ 17,8%; bloqueio vs penalização; margem 60% — uma alteração de cada vez, sem recalibrar, 20 corridas por cenário (`experiments/run_sensitivity.py`, `analysis/analyze_sensitivity.py`, resultados em `results/sensitivity/`). As duas conclusões da tarefa 5 mantêm-se nas 10 variantes: baixar sozinho compensa a pelo menos um incumbente (com κ = 0,30 a MEO perde 3%), e o bandit fica perto do preço de lista (multiplicador 0,97–0,98, lucro conjunto −0,2% a −4,1%). As variantes não são recalibradas: medem a robustez das conclusões, não o ajuste aos dados
 - [ ] Escrever as secções 3–5 do relatório em inglês
 
 ## Onde está cada coisa
@@ -124,7 +128,9 @@ Tudo está no repositório `Projeto1_baseline`. O baseline (`consumer_choice/mod
 | `consumer_choice/learning.py` | Preços fixos e bandit (tarefa 5) |
 | `tests/test_telecom.py` | Testes: regressão contra o baseline, penalizações, renovação, políticas de preço |
 | `calibration/` | Scripts de calibração; resultados em `results/v2/` |
-| `experiments/run_pricing.py` | Cenários de preço e bandit; resultados em `results/pricing/` (versão δ = 17,8% em `results/pricing_delta178/`) |
+| `experiments/run_pricing.py` | Cenários de preço e bandit; resultados em `results/pricing/` (bandit antes da D23 em `results/pricing_bandit_v1/`; versão δ = 17,8% em `results/pricing_delta178/`). `quick` grava em `results/pricing_quick/` |
 | `analysis/analyze_pricing.py` | Tabelas e figuras da tarefa 5 |
+| `experiments/run_sensitivity.py` | Análise de sensibilidade (tarefa 6); resultados em `results/sensitivity/` |
+| `analysis/analyze_sensitivity.py` | Tabela e figura da sensibilidade (`results/sensitivity/tables/summary.csv`, `figures/sensitivity.png`) |
 | `visualization/live.py` | Janela ao vivo, ao estilo do NetLogo |
 | `visualization/app.py` | Interface do Mesa no browser (SolaraViz) |
