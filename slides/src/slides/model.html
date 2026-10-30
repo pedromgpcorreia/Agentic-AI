@@ -1,0 +1,14 @@
+<section id="model" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 128px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 1</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:500">The decision rule: habit, exploration, utility</h2>
+<p style="font-size:32px;color:#4A4E55">Consumers linked in a social network choose one of two products. Every tick, each one goes through three steps.</p>
+<div style="display:flex;gap:24px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#EFEDE4;padding:40px;border-radius:12px"><h3 style="font-size:44px;font-weight:600">1. Habit</h3><p style="font-size:36px;line-height:1.35">Keeps the product with probability equal to its satisfaction: log₁₀(1 + 9q)</p></div>
+<x-shape kind="arrow-right" style="width:56px;height:32px;background:#6A33A8;align-self:center"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#EFEDE4;padding:40px;border-radius:12px"><h3 style="font-size:44px;font-weight:600">2. Exploration</h3><p style="font-size:36px;line-height:1.35">Otherwise, tries the other product with a small probability</p></div>
+<x-shape kind="arrow-right" style="width:56px;height:32px;background:#6A33A8;align-self:center"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#EFEDE4;padding:40px;border-radius:12px"><h3 style="font-size:44px;font-weight:600">3. Utility</h3><p style="font-size:36px;line-height:1.35">Otherwise, picks the higher utility: own experience, friends’ information and the social norm</p></div>
+</div>
+<p style="font-size:34px;color:#4A4E55">Outputs: market share of each product and clustering, the mean share of friends using the same product.</p>
+<aside>Baseline: 100 consumers, fixed population, the defaults of the original NetLogo model by Jager and Wang. This rule stays in every later version. With two products and the extensions switched off, the extended model reproduces the baseline exactly; an automatic test checks this.</aside>
+</section>

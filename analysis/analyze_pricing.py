@@ -101,7 +101,7 @@ for sc, lab, ls in [("no_entry", "No entry (NOWO)", ":"), ("fixed_1.00", "Fixed 
             color=COL["DIGI"] if sc == MAIN else INK2 if sc != "fixed_0.90" else "#999")
 ax.scatter([19, 25, 28], [2.8, 3.0, 3.2], color="k", s=10, zorder=5, label="ANACOM")
 ax.axvline(ENTRY, color=GRID, lw=1)
-ax.set(xlabel="Month (0 = Sept. 2024)", ylabel="Share of position 3 (%)")
+ax.set(xlabel="Month (0 = Nov. 2023)", ylabel="NOWO/DIGI share (%)")
 ax.legend(ncol=2)
 save(fig, "digi_share")
 

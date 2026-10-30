@@ -1,0 +1,12 @@
+<section id="learning" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 128px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 5</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:500">Learning: each incumbent runs its own bandit</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:10px;background:#EFEDE4;padding:32px;border-radius:12px"><h3 style="font-size:34px;font-weight:600">Who and when</h3><p style="font-size:33px;line-height:1.3">MEO, NOS and Vodafone, from DIGI’s entry, every 3 months. DIGI stays at €22.</p></div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#EFEDE4;padding:32px;border-radius:12px"><h3 style="font-size:34px;font-weight:600">Actions</h3><p style="font-size:33px;line-height:1.3">List price × 1.00, 0.95, 0.90, 0.85 or 0.80, always above unit cost (× 0.60).</p></div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#EFEDE4;padding:32px;border-radius:12px"><h3 style="font-size:34px;font-weight:600">Reward</h3><p style="font-size:33px;line-height:1.3">The margin of the last period, not revenue. Rivals’ prices are not observed.</p></div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#EFEDE4;padding:32px;border-radius:12px"><h3 style="font-size:34px;font-weight:600">Method</h3><p style="font-size:33px;line-height:1.3">ε-greedy, ε = 0.1, step α = 0.2. Each price is tried once, in random order.</p></div>
+</div>
+<p style="font-size:30px;line-height:1.3">Compared with fixed-price scenarios, using the same random numbers: <b>30 runs per scenario, 10 years after entry.</b></p>
+<aside>Sutton and Barto 2018 for the method. Common random numbers mean seed s is used in every scenario, so differences are not due to chance draws; the bandit has its own generator for this reason. We corrected the original bandit: arms were tried in a fixed order from 0.95 to 0.80 while profit was falling, which made low prices look worse. This correction is decision D23.</aside>
+</section>

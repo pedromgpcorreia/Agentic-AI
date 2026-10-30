@@ -1,0 +1,15 @@
+<section id="extension" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:72px 128px 72px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 3</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:500">Same decision rule, a real market around it</h2>
+<table style="font-size:32px;color:#1C2230">
+<tr><th style="width:20%;padding:14px">Element</th><th style="width:28%;padding:14px">Baseline</th><th style="width:52%;padding:14px">Extended model</th></tr>
+<tr><td>Time</td><td>Abstract tick</td><td>1 tick = 1 month</td></tr>
+<tr><td>Products</td><td>Orange, blue</td><td>MEO, NOS, Vodafone, NOWO; NOWO becomes DIGI in month 12</td></tr>
+<tr><td>Initial shares</td><td>50 / 50</td><td>41.8 / 35.0 / 20.6 / 2.6% (ANACOM, Q3 2024)</td></tr>
+<tr><td>Price</td><td>None</td><td>In utility; weight tied to the norm through Confraria et al.</td></tr>
+<tr><td>Quality</td><td>Fixed parameter</td><td>From complaints; DIGI improves over 18 months</td></tr>
+<tr><td>Contracts</td><td>None</td><td>24 months (DIGI 3), legal penalty, renewal with a discount</td></tr>
+<tr><td>Population</td><td>100, fixed</td><td>Starts at 1000; 0.5% exits per month; about 1% growth per year</td></tr>
+</table>
+<aside>The regression test guarantees that the baseline is still inside the extended model: with two products and extensions off, the results are identical. Renewal is the consumer’s decision: they accept the 10% discount only if it exceeds their personal cost of being committed.</aside>
+</section>

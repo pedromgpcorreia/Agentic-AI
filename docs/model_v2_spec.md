@@ -438,7 +438,7 @@ Os resultados com δ = 17,8% estão em `results/pricing_delta178/`.
 - **Resultados (δ = 10%, 30 corridas, `results/pricing/`; os anteriores ficam em `results/pricing_bandit_v1/`):**
   - Bandit (ε = 0,1, α = 0,2): lucro conjunto −2,4% (IC 95% −3,5 a −1,3); multiplicador médio 0,98; preço de lista
     escolhido em 85% (MEO), 88% (NOS) e 88% (Vodafone) das decisões dos anos 6–10; DIGI a 10 anos 18,1%.
-  - 9 combinações de ε e α: lucro conjunto entre −2,3% e −4,4%; multiplicador médio entre 0,97 e 0,98.
+  - 9 combinações de ε e α: lucro conjunto entre −2,2% e −4,4%; multiplicador médio entre 0,97 e 0,98.
   - Decisão de 6 em 6 meses: −3,9%, multiplicador 0,97, DIGI 16,3%. De 12 em 12 meses: −7,5%, multiplicador 0,94,
     DIGI 12,4%. Com um horizonte mais longo as descidas compensam mais, porque os clientes ganhos chegam ao longo de
     contratos de 24 meses.
@@ -452,9 +452,9 @@ Os resultados com δ = 17,8% estão em `results/pricing_delta178/`.
   no início 50% / 90%; δ 17,8%; bloqueio total; margem 60%. Em cada variante: todos ao preço de lista, cada incumbente
   sozinho a ×0,90 e o bandit corrigido; 20 corridas por cenário, mesmos números aleatórios
   (`experiments/run_sensitivity.py`, `analysis/analyze_sensitivity.py`, `results/sensitivity/`).
-- Baixar sozinho compensa a pelo menos um incumbente nas 10 variantes (NOS +9,8% a +38,7%; Vodafone +22,3% a +64,4%);
+- Baixar sozinho compensa a pelo menos um incumbente nas 9 alterações (NOS +9,8% a +38,7%; Vodafone +22,3% a +64,4%);
   a única descida que não compensa é a da MEO com κ = 0,30 (−3,0%), porque é a de melhor qualidade.
-- O bandit fica perto do preço de lista em todas: multiplicador 0,97–0,98, lucro conjunto −0,2% a −4,1%.
+- O bandit fica perto do preço de lista em todas: multiplicador 0,97–0,98, lucro conjunto −0,1% a −4,1%.
 - Mais saídas (mais famílias novas sem contrato) e margem maior tornam as descidas mais rentáveis.
 - Sem recalibração a quota da DIGI no mês 28 afasta-se dos dados em algumas variantes (4,85% com κ = 0,10; 2,24% com
   κ = 0,30; ANACOM 3,2%): a análise mede a robustez das conclusões, não o ajuste aos dados.

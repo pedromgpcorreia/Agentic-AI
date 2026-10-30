@@ -1,0 +1,205 @@
+<!doctype html><meta charset="utf-8"><title>DIGI Entry: Consumer Choice Model</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400..700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>*{margin:0;box-sizing:border-box}section{width:1920px;height:1080px;position:relative;overflow:hidden;border-bottom:4px solid #999}aside{display:none}table{border-collapse:collapse;width:100%}td,th{padding:.35em .6em;border-bottom:1px solid #bbb;text-align:left}x-shape{display:block;clip-path:polygon(0 30%,60% 30%,60% 0,100% 50%,60% 100%,60% 70%,0 70%)}ul{padding-left:1.2em}</style><script>const f=()=>document.documentElement.style.zoom=innerWidth/1920;addEventListener("resize",f);f()</script><section id="cover" data-transition="fade" style="background:#1C2230;color:#F8F7F2;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<p style="font-size:28px;color:#C9B4E8;font-weight:500">Project 1 · Multi-Agent Systems and Simulation of Organizations</p>
+<h1 style="font-family:'Source Serif 4', Georgia, serif;font-size:96px;font-weight:500;line-height:1.1">How do incumbents respond when a low-cost rival enters?</h1>
+<p style="font-size:36px;color:#D8D6CE;line-height:1.35">An agent-based model of DIGI’s entry into the Portuguese bundled-services market, built on the Consumer Choice model</p>
+<p style="position:absolute;left:128px;bottom:72px;width:1664px;font-size:28px;color:#D8D6CE">[Group members]</p>
+<aside>Introduce the group. We started from the NetLogo Consumer Choice model, rebuilt it in Mesa, fitted it to the Portuguese market and let the incumbents learn prices.</aside>
+</section>
+<section id="roadmap" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 128px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:500">Six tasks, from baseline to conclusions</h2>
+<table style="font-size:36px;color:#1C2230">
+<tr><th style="width:10%;padding:16px">Task</th><th style="width:36%;padding:16px">What was asked</th><th style="width:54%;padding:16px">What we did</th></tr>
+<tr><td>1</td><td>Analyse the model, set a baseline</td><td>Consumer Choice rebuilt in Python and Mesa</td></tr>
+<tr><td>2</td><td>Run many iterations for statistics</td><td>1000 baseline runs; 3 sensitivity experiments</td></tr>
+<tr><td>3</td><td>Fit the model to a real situation</td><td>DIGI’s entry, calibrated to ANACOM shares</td></tr>
+<tr><td>4</td><td>Support it with data and articles</td><td>ANACOM, Lei 16/2022, Confraria et al. (2017)</td></tr>
+<tr><td>5</td><td>Extend it with agent learning</td><td>Incumbents learn prices with a bandit</td></tr>
+<tr><td>6</td><td>Run the new model and conclude</td><td>9 one-at-a-time changes; conclusions hold</td></tr>
+</table>
+<aside>This is the map of the talk. Each later slide says which task it belongs to.</aside>
+</section>
+<section id="model" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 128px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 1</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:500">The decision rule: habit, exploration, utility</h2>
+<p style="font-size:32px;color:#4A4E55">Consumers linked in a social network choose one of two products. Every tick, each one goes through three steps.</p>
+<div style="display:flex;gap:24px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#EFEDE4;padding:40px;border-radius:12px"><h3 style="font-size:44px;font-weight:600">1. Habit</h3><p style="font-size:36px;line-height:1.35">Keeps the product with probability equal to its satisfaction: log₁₀(1 + 9q)</p></div>
+<x-shape kind="arrow-right" style="width:56px;height:32px;background:#6A33A8;align-self:center"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#EFEDE4;padding:40px;border-radius:12px"><h3 style="font-size:44px;font-weight:600">2. Exploration</h3><p style="font-size:36px;line-height:1.35">Otherwise, tries the other product with a small probability</p></div>
+<x-shape kind="arrow-right" style="width:56px;height:32px;background:#6A33A8;align-self:center"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#EFEDE4;padding:40px;border-radius:12px"><h3 style="font-size:44px;font-weight:600">3. Utility</h3><p style="font-size:36px;line-height:1.35">Otherwise, picks the higher utility: own experience, friends’ information and the social norm</p></div>
+</div>
+<p style="font-size:34px;color:#4A4E55">Outputs: market share of each product and clustering, the mean share of friends using the same product.</p>
+<aside>Baseline: 100 consumers, fixed population, the defaults of the original NetLogo model by Jager and Wang. This rule stays in every later version. With two products and the extensions switched off, the extended model reproduces the baseline exactly; an automatic test checks this.</aside>
+</section>
+<section id="baseline" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:64px 128px 64px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 2</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:500">Baseline: strong clusters, unpredictable winner</h2>
+<img src="assets/baseline.png" alt="Left: mean clustering rises from 0.5 to 0.937 by tick 1000. Right: histogram of the orange share at tick 1000 across 1000 runs, spread from 0 to 100 percent." style="width:1660px;height:600px;object-fit:contain">
+<p style="font-size:30px;line-height:1.3">1000 runs, tick 1000. Clustering <b>0.937</b> (95% CI 0.935–0.939). Orange share <b>0.506</b> on average, but SD <b>0.252</b>: equal products, very different outcomes.</p>
+<aside>The mean market share is about one half, as expected with two equal products, but no single run looks like the mean: the middle 90% of runs lie between 0.11 and 0.92. Identical settings lead to different market outcomes, driven by social influence and chance. Horizon: clustering is still rising slowly, 0.948 at tick 2000.</aside>
+</section>
+<section id="baselinesens" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:64px 128px 64px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 2</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:500">Baseline: what moves the outcome</h2>
+<img src="assets/baseline_sens.png" alt="Three panels of mean clustering and orange share at tick 1000 against norm influence, quality of blue and exploration." style="width:1660px;height:560px;object-fit:contain">
+<div style="display:flex;gap:32px">
+<p style="flex:1;font-size:28px;line-height:1.3"><b>Any norm creates clusters:</b> clustering 0.543 at norm 0, about 0.94 from 0.1 up.</p>
+<p style="flex:1;font-size:28px;line-height:1.3"><b>Small quality gaps decide:</b> orange 0.951 when blue is 0.45, 0.071 when blue is 0.55.</p>
+<p style="flex:1;font-size:28px;line-height:1.3"><b>Exploration breaks clusters:</b> clustering falls to 0.673 at exploration 0.2.</p>
+</div>
+<aside>100 runs per value, one parameter at a time. If asked: norm 0.1 and 0.2 give identical results. This is a real property of the rule with the same seeds, which we reproduced by rerunning the model; the likely reason is that consumers compare utilities, so a different weight need not change any choice.</aside>
+</section>
+<section id="case" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 128px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 3</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:500">The real case: half the price, little share</h2>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#EFEDE4;padding:40px;border-radius:12px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:80px;font-weight:500">€22</p><p style="font-size:30px;line-height:1.3">DIGI fibre + TV, against €42.49 at MEO and NOS and €40.50 at Vodafone</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#EFEDE4;padding:40px;border-radius:12px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:80px;font-weight:500">3 months</p><p style="font-size:30px;line-height:1.3">DIGI’s commitment, against 24 months at the incumbents</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#EFEDE4;padding:40px;border-radius:12px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:80px;font-weight:500">+0.6 pp</p><p style="font-size:30px;line-height:1.3">DIGI/NOWO share in about 18 months: 2.6% in Q3 2024, 3.2% in Q1 2026</p></div>
+</div>
+<p style="font-size:36px;line-height:1.3">Why does such a cheap entrant grow so slowly, and what is the incumbents’ best response?</p>
+<p style="position:absolute;left:128px;bottom:56px;width:1664px;font-size:24px;color:#55595F">Sources: ANACOM bundled services; CNN Portugal/DECO PROteste barometer, Oct 2025; Observador, 4 Nov 2024</p>
+<aside>Incumbent shares barely moved: MEO 41.8 to 41.5, NOS 35.0 to 34.9, Vodafone 20.6 to 20.3 percent. The main brands did not cut prices; they answered with low-cost brands such as Uzo, Woo and Amigo. DIGI bought NOWO, and ANACOM reports both on one line.</aside>
+</section>
+<section id="extension" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:72px 128px 72px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 3</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:500">Same decision rule, a real market around it</h2>
+<table style="font-size:32px;color:#1C2230">
+<tr><th style="width:20%;padding:14px">Element</th><th style="width:28%;padding:14px">Baseline</th><th style="width:52%;padding:14px">Extended model</th></tr>
+<tr><td>Time</td><td>Abstract tick</td><td>1 tick = 1 month</td></tr>
+<tr><td>Products</td><td>Orange, blue</td><td>MEO, NOS, Vodafone, NOWO; NOWO becomes DIGI in month 12</td></tr>
+<tr><td>Initial shares</td><td>50 / 50</td><td>41.8 / 35.0 / 20.6 / 2.6% (ANACOM, Q3 2024)</td></tr>
+<tr><td>Price</td><td>None</td><td>In utility; weight tied to the norm through Confraria et al.</td></tr>
+<tr><td>Quality</td><td>Fixed parameter</td><td>From complaints; DIGI improves over 18 months</td></tr>
+<tr><td>Contracts</td><td>None</td><td>24 months (DIGI 3), legal penalty, renewal with a discount</td></tr>
+<tr><td>Population</td><td>100, fixed</td><td>Starts at 1000; 0.5% exits per month; about 1% growth per year</td></tr>
+</table>
+<aside>The regression test guarantees that the baseline is still inside the extended model: with two products and extensions off, the results are identical. Renewal is the consumer’s decision: they accept the 10% discount only if it exceeds their personal cost of being committed.</aside>
+</section>
+<section id="live" data-transition="fade" style="background:#FDFDFB;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:64px 128px 64px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 3</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:500">The model running: 48 months of one simulation</h2>
+<img src="assets/live_clean.gif" alt="Animation of one run: consumers on a network coloured by operator, next to market shares and list prices over 48 months." style="width:1664px;height:671px;object-fit:contain">
+<p style="font-size:28px;line-height:1.3">Dots are consumers, coloured by operator; lines are friendships. Right: market shares and list prices, with prices learned from month 12.</p>
+<aside>One single run, for illustration only; all the results that follow are means of many runs. Watch the price panel: after the entry each incumbent tries each price once, then settles close to list. For a live demo run: python visualization/live.py, or solara run visualization/app.py for the browser interface.</aside>
+</section>
+<section id="sources" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:72px 128px 72px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 4</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:500">Where the parameters come from</h2>
+<table style="font-size:31px;color:#1C2230">
+<tr><th style="width:24%;padding:14px">Parameter</th><th style="width:36%;padding:14px">Value</th><th style="width:40%;padding:14px">Source</th></tr>
+<tr><td>Shares, targets</td><td>DIGI 2.8 / 3.0 / 3.2%</td><td>ANACOM, months 19 / 25 / 28</td></tr>
+<tr><td>Quality</td><td>q = 0.80 − 0.20 · ln(r)</td><td>ANACOM complaints; κ is assumed</td></tr>
+<tr><td>Price weight</td><td>€10.22 per unit of share</td><td>Confraria et al. (2017), Table 4</td></tr>
+<tr><td>Commitment cost</td><td>€5.25/month for 24 months, ±50%</td><td>Confraria et al. (2017); spread assumed</td></tr>
+<tr><td>Early-exit penalty</td><td>50% in year 1, 30% in year 2</td><td>Lei 16/2022</td></tr>
+<tr><td>Margin</td><td>40%</td><td>EBITDA 2024: NOS 45.3%, MEO 35.8%</td></tr>
+<tr><td>Under contract at start</td><td>70%</td><td>Assumed; no public data; tested 50–90%</td></tr>
+<tr><td>Renewal discount</td><td>10%</td><td>Group decision; 17.8% tested</td></tr>
+</table>
+<aside>Be clear about what is data and what is assumption: kappa, the 70 percent and the renewal discount are modelling choices, which is why task 6 tests them. r is complaints relative to the incumbents’ mean. Examples: DIGI r = 3.13 in 2025 gives q = 0.572; r = 1.25 in Q2 2026 gives q = 0.756. Confraria et al. measure mobile plans, so applying them to fixed bundles is an assumption.</aside>
+</section>
+<section id="calibration" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:72px 128px 72px;display:flex;flex-direction:column;gap:24px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Tasks 3 and 4</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:500">Calibration against ANACOM</h2>
+<div style="display:flex;gap:48px;align-items:center">
+<img src="assets/calibration.png" alt="DIGI share in the model, flat near 2.4 percent until month 19 and rising to 3.2 percent at month 28, against ANACOM points of 2.6, 2.8, 3.0 and 3.2 percent." style="width:1000px;height:640px;object-fit:contain">
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<table style="font-size:28px;color:#1C2230">
+<tr><th style="width:40%;padding:12px">Month</th><th style="width:30%;padding:12px">Model</th><th style="width:30%;padding:12px">ANACOM</th></tr>
+<tr><td>19</td><td>2.4%</td><td>2.8%</td></tr>
+<tr><td>25</td><td>2.9%</td><td>3.0%</td></tr>
+<tr><td>28</td><td>3.2%</td><td>3.2%</td></tr>
+</table>
+<p style="font-size:30px;line-height:1.3">Error <b>0.22 pp</b> (RMSE, 30 runs). Target at month 28 was 3.2 ± 0.5 pp.</p>
+<p style="font-size:28px;line-height:1.3;color:#4A4E55">Fitted: norm 0.10, exploration 0.02, brand constants.</p>
+</div>
+</div>
+<aside>The model reproduces the end point but grows later than the data: it stays flat until month 19. The grid search gave 0.15 pp with its own runs and the decision log reports 0.18 pp with 48 runs; here we show the 30 runs used in the results. Incumbents at month 28: model 40.3, 35.1, 21.4 percent against ANACOM 41.5, 34.9, 20.3. Only DIGI’s path is a calibration target.</aside>
+</section>
+<section id="learning" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 128px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 5</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:500">Learning: each incumbent runs its own bandit</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:10px;background:#EFEDE4;padding:32px;border-radius:12px"><h3 style="font-size:34px;font-weight:600">Who and when</h3><p style="font-size:33px;line-height:1.3">MEO, NOS and Vodafone, from DIGI’s entry, every 3 months. DIGI stays at €22.</p></div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#EFEDE4;padding:32px;border-radius:12px"><h3 style="font-size:34px;font-weight:600">Actions</h3><p style="font-size:33px;line-height:1.3">List price × 1.00, 0.95, 0.90, 0.85 or 0.80, always above unit cost (× 0.60).</p></div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#EFEDE4;padding:32px;border-radius:12px"><h3 style="font-size:34px;font-weight:600">Reward</h3><p style="font-size:33px;line-height:1.3">The margin of the last period, not revenue. Rivals’ prices are not observed.</p></div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#EFEDE4;padding:32px;border-radius:12px"><h3 style="font-size:34px;font-weight:600">Method</h3><p style="font-size:33px;line-height:1.3">ε-greedy, ε = 0.1, step α = 0.2. Each price is tried once, in random order.</p></div>
+</div>
+<p style="font-size:30px;line-height:1.3">Compared with fixed-price scenarios, using the same random numbers: <b>30 runs per scenario, 10 years after entry.</b></p>
+<aside>Sutton and Barto 2018 for the method. Common random numbers mean seed s is used in every scenario, so differences are not due to chance draws; the bandit has its own generator for this reason. We corrected the original bandit: arms were tried in a fixed order from 0.95 to 0.80 while profit was falling, which made low prices look worse. This correction is decision D23.</aside>
+</section>
+<section id="profit" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:64px 128px 64px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 5</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:500">Learned prices cost little; cutting together costs a lot</h2>
+<img src="assets/profit.png" alt="Bars of joint incumbent profit against all at list price: no entry +11.4 percent, learned every 3 months −2.4, every 6 months −3.9, every 12 months −7.5, all at 0.95 −9.1, 0.90 −17.5, 0.85 −28.4, 0.80 −41.2." style="width:1660px;height:640px;object-fit:contain">
+<p style="font-size:28px;line-height:1.3">Paired by seed, with 95% CI. DIGI share is the mean of the last 12 months. DIGI costs the incumbents about a tenth of their profit: no-entry is +11.4%.</p>
+<aside>Main bandit: minus 2.4 percent, confidence interval minus 3.5 to minus 1.3. All at 0.95 already costs minus 9.1 percent. A longer decision period makes the incumbents cut more, multiplier 0.97 at 6 months and 0.94 at 12 months, and DIGI grow less. Lower prices protect share but do not pay: list prices are the most profitable of the options where everybody moves together.</aside>
+</section>
+<section id="dilemma" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 128px;display:flex;flex-direction:column;gap:36px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 5</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:500">A prisoner’s dilemma: each gains alone, all lose together</h2>
+<table style="font-size:48px;color:#1C2230">
+<tr><th style="width:30%;padding:20px">Own profit vs list</th><th style="width:35%;padding:20px">Cuts alone to ×0.90</th><th style="width:35%;padding:20px">All cut to ×0.90</th></tr>
+<tr><td>MEO</td><td>+14.9%</td><td>−18.3%</td></tr>
+<tr><td>NOS</td><td>+19.3%</td><td>−8.7%</td></tr>
+<tr><td>Vodafone</td><td>+36.2%</td><td>−30.5%</td></tr>
+</table>
+<p style="font-size:36px;line-height:1.3">So list price is not an equilibrium, yet it is where the joint profit is highest among the symmetric prices we tested.</p>
+<aside>Each of the three confidence intervals excludes zero. Solo cuts take customers from the rivals, so joint profit still falls by 6.6 to 8.9 percent. A deeper solo cut, to 0.80, loses money for MEO, minus 11.1, and NOS, minus 8.3, and still pays for Vodafone, plus 13.1.</aside>
+</section>
+<section id="prices" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:64px 128px 64px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 5</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:500">Learned prices return to the list price</h2>
+<img src="assets/learned.png" alt="Left: mean price over list price drops to about 0.86 during the trials after entry, then returns to about 0.98 to 1.00. Right: list price chosen in 85 percent of decisions for MEO, 88 for NOS and 88 for Vodafone in years 6 to 10." style="width:1660px;height:600px;object-fit:contain">
+<p style="font-size:28px;line-height:1.3">Mean multiplier <b>0.98</b>. Across 9 ε, α combinations: joint profit −2.2% to −4.4%, multiplier 0.97–0.98. <b>Not learned collusion:</b> the bandit cannot see rivals, and its 3-month reward favours keeping margin.</p>
+<aside>The early dip is the trial phase, when every price is tried once. The remaining share of cuts in later years is mostly exploration: 10 percent of decisions are random; among non-exploring decisions the list price is chosen 95 percent of the time. Compatible with Calvano et al. 2020 in that independent algorithms stay above the competitive price, but the mechanism here is different: the short reward horizon. Contract customers arrive slowly, over 24-month contracts, while a price cut lowers margin immediately.</aside>
+</section>
+<section id="digi" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:64px 128px 64px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 5</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:500">DIGI grows slowly at first, then keeps gaining</h2>
+<img src="assets/digi.png" alt="DIGI share over 132 months in four scenarios: all at list price reaches about 24 percent, learned prices about 19, all at 0.90 about 8, and no entry stays near 1 percent." style="width:1660px;height:600px;object-fit:contain">
+<p style="font-size:28px;line-height:1.3">Mean over the last 12 months: <b>22.6%</b> at list prices, <b>18.1%</b> with learned prices, <b>7.9%</b> with all at ×0.90. Use these to compare scenarios: 10 years is far beyond our 30 months of data, so <b>they are not forecasts.</b></p>
+<aside>Slow start, as in the data: contracts, habit and limited information hold consumers back. Without the entry, NOWO shrinks to about 1 percent. The dashed vertical line is the entry, month 12, November 2024.</aside>
+</section>
+<section id="sensitivity" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:56px 128px 56px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 6</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:500">Both conclusions hold in all 9 changes</h2>
+<img src="assets/sensitivity.png" alt="Left: own profit from cutting alone to 0.90 in each variant, positive everywhere except MEO at kappa 0.30. Right: joint profit with learned prices, between about −4 and 0 percent." style="width:1660px;height:640px;object-fit:contain">
+<p style="font-size:28px;line-height:1.3">A solo cut pays for NOS (+9.8% to +38.7%) and Vodafone (+22.3% to +64.4%); only MEO at κ = 0.30 loses (−3.0%). Learned prices: multiplier 0.97–0.98, joint profit −0.1% to −4.1%.</p>
+<aside>One change at a time, not recalibrated, 20 runs per scenario, 95 percent confidence intervals. Because of the 20 runs the base row differs slightly from the 30-run results. With exits of 1 percent and margin 60 percent the joint-profit interval includes zero. Without recalibration, DIGI’s share at month 28 moves away from the data in some variants: 4.85 percent at kappa 0.10, 2.24 percent at kappa 0.30, so this tests the robustness of the conclusions, not the fit.</aside>
+</section>
+<section id="conclusions" data-transition="fade" style="background:#1C2230;color:#F8F7F2;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 96px;display:flex;flex-direction:column;gap:44px;justify-content:center">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:500">Conclusions</h2>
+<div style="display:flex;flex-direction:column;gap:12px"><h3 style="font-size:40px;font-weight:600;color:#C9B4E8">Contracts and habit slow a much cheaper rival</h3><p style="font-size:32px;line-height:1.3;color:#D8D6CE">The calibrated model reaches ANACOM’s 3.2% at month 28 at half the price.</p></div>
+<div style="display:flex;flex-direction:column;gap:12px"><h3 style="font-size:40px;font-weight:600;color:#C9B4E8">Matching on price does not pay</h3><p style="font-size:32px;line-height:1.3;color:#D8D6CE">All at ×0.90 stops much of DIGI’s growth, but costs 17.5% of joint profit.</p></div>
+<div style="display:flex;flex-direction:column;gap:12px"><h3 style="font-size:40px;font-weight:600;color:#C9B4E8">Each incumbent is tempted to cut alone</h3><p style="font-size:32px;line-height:1.3;color:#D8D6CE">A solo cut gains 14.9% to 36.2%: a prisoner’s dilemma.</p></div>
+<div style="display:flex;flex-direction:column;gap:12px"><h3 style="font-size:40px;font-weight:600;color:#C9B4E8">Simple learners stay near list price without communicating</h3><p style="font-size:32px;line-height:1.3;color:#D8D6CE">Consistent with what we observe: main brands kept prices, and the incumbents answered with low-cost brands.</p></div>
+<aside>The last point is a match to a qualitative fact, not a test: the model has no low-cost second brands, and the result comes from short-horizon rewards, not from a learned collusive strategy.</aside>
+</section>
+<section id="limits" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 128px;display:flex;flex-direction:column;gap:36px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:500">Limitations</h2>
+<table style="font-size:34px;color:#1C2230">
+<tr><th style="width:32%;padding:16px">Limitation</th><th style="width:68%;padding:16px">What it means</th></tr>
+<tr><td>Long horizon</td><td>10 years against 30 months of data: compare scenarios, do not forecast</td></tr>
+<tr><td>Low mobility at contract end</td><td>Under 1% switch in the model; Confraria et al. estimate 13.6% (mobile, 2014)</td></tr>
+<tr><td>Drift without DIGI</td><td>MEO 41.1% to 39.7% and NOWO 2.4% to 1.5%, months 12–72</td></tr>
+<tr><td>Bandit design</td><td>No view of rivals and a short reward horizon; no second low-cost brands</td></tr>
+<tr><td>Assumed parameters</td><td>κ, the initial contract share and the commitment spread have no direct data</td></tr>
+</table>
+<aside>All scenarios are compared with the same random numbers, which limits the effect of the drift on the comparisons. Natural next steps: a learner that observes rivals, longer reward horizons and low-cost brands as an action.</aside>
+</section>
+<section id="refs" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 96px;display:flex;flex-direction:column;gap:32px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:500">References</h2>
+<ul style="font-size:31px;line-height:1.35;color:#2C313C">
+<li>Jager, W., Wang, S.: NetLogo Consumer Choice model. CCL, Northwestern University (2024)</li>
+<li>Janssen, M.A., Jager, W.: Fashions, Habits and Changing Preferences. J. Econ. Psychol. 22(6), 745–772 (2001)</li>
+<li>Confraria, J., Ribeiro, T., Vasconcelos, H.: Analysis of Consumer Preferences for Mobile Telecom Plans Using a Discrete Choice Experiment. Telecommun. Policy 41(3), 157–169 (2017)</li>
+<li>Calvano, E., Calzolari, G., Denicolò, V., Pastorello, S.: Artificial Intelligence, Algorithmic Pricing, and Collusion. Am. Econ. Rev. 110(10), 3267–3297 (2020)</li>
+<li>Sutton, R.S., Barto, A.G.: Reinforcement Learning: An Introduction, 2nd edn. MIT Press (2018)</li>
+<li>ter Hoeven, E., et al.: Mesa 3: Agent-Based Modeling with Python in 2025. JOSS 10(107), 7668 (2025)</li>
+<li>Data: ANACOM (bundled services, complaints); CNN Portugal/DECO PROteste barometer (Oct 2025); Observador (4 Nov 2024); Lei 16/2022</li>
+</ul>
+<aside>Code and results are in the group repository, in the folders experiments, analysis and results.</aside>
+</section>

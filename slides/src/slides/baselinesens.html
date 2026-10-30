@@ -1,0 +1,11 @@
+<section id="baselinesens" data-transition="fade" style="background:#F8F7F2;color:#1C2230;font-family:'IBM Plex Sans', Arial, sans-serif;padding:64px 128px 64px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:26px;font-weight:600;color:#6A33A8">Task 2</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:500">Baseline: what moves the outcome</h2>
+<img src="/_blob/fb4d6c76d8eab9b1fe0959d555c1114f" alt="Three panels of mean clustering and orange share at tick 1000 against norm influence, quality of blue and exploration." style="width:1660px;height:560px;object-fit:contain">
+<div style="display:flex;gap:32px">
+<p style="flex:1;font-size:28px;line-height:1.3"><b>Any norm creates clusters:</b> clustering 0.543 at norm 0, about 0.94 from 0.1 up.</p>
+<p style="flex:1;font-size:28px;line-height:1.3"><b>Small quality gaps decide:</b> orange 0.951 when blue is 0.45, 0.071 when blue is 0.55.</p>
+<p style="flex:1;font-size:28px;line-height:1.3"><b>Exploration breaks clusters:</b> clustering falls to 0.673 at exploration 0.2.</p>
+</div>
+<aside>100 runs per value, one parameter at a time. If asked: norm 0.1 and 0.2 give identical results. This is a real property of the rule with the same seeds, which we reproduced by rerunning the model; the likely reason is that consumers compare utilities, so a different weight need not change any choice.</aside>
+</section>

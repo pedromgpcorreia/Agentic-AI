@@ -41,12 +41,12 @@ LABELS = ["MEO", "NOS", "Vodafone", "NOWO / DIGI"]
 COLORS = ["#2a78d6", "#eb6834", "#1a9e77", "#7a3fbf"]
 NOWO_COLOR = "#9a9a9a"
 POLICIES = ["List prices", "Learned (bandit)", "All at 0.90"]
-MONTHS_PT = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"]
+MONTHS_PT = ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"]
 ANACOM = {19: 2.8, 25: 3.0, 28: 3.2}       # DIGI/NOWO share (%), ANACOM Q2 2025, Q4 2025, Q1 2026
 
 
 def month_label(t):
-    return f"{MONTHS_PT[t % 12]} {2024 + (t + 8) // 12}"
+    return f"{MONTHS_PT[t % 12]} {2023 + (t + 10) // 12}"
 
 
 class LiveView:
@@ -191,7 +191,7 @@ class LiveView:
         self.ax_price.set_ylim(15, 46)
         self.ax_contract.plot(t, h["contract"], color="#1a1a1a", lw=1.4)
         self.ax_contract.set_ylabel("under contract (%)")
-        self.ax_contract.set_ylim(50, 90)
+        self.ax_contract.set_ylim(0, 90)
         self.ax_contract.set_xlabel("month")
         xmax = max(36, t[-1] + 1)
         for ax in (self.ax_share, self.ax_price, self.ax_contract):

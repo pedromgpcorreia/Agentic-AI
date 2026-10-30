@@ -49,6 +49,7 @@ data/                           raw outputs of the experiments (compressed CSV)
 results/figures/                figures used in the report
 results/tables/                 tables and summary.json
 report/                         report (Word, LNCS template) and the script that builds it
+slides/                         presentation of tasks 1-6 (open slides/deck.html; see slides/README.md)
 ```
 
 ## How to run

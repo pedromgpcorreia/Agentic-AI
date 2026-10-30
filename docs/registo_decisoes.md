@@ -43,7 +43,7 @@ Foram tomadas 23 decisões de modelação; a D23 (correção do bandit) ainda te
 | D2 | Relatório em inglês, tom formal; tarefas 1–2 e relatório do GitHub ficam como estão | Pedro | Coerência com o que já foi entregue ao grupo | — |
 | D3 | Manter a regra do Consumer Choice (hábito → exploração → utilidade) e acrescentar preço e contratos; não usar o logit do protótipo | Pedro | As tarefas 1–2 continuam a ser a base; com 2 produtos o modelo novo reproduz o baseline exatamente (teste automático) | Reescrever `consume` e `update_utilities` |
 | D4 | 1 tick = 1 mês | Pedro | Dados ANACOM trimestrais, contratos e preços mensais; 1 dia exigia 30× mais passos | — |
-| D5 | 4 operadoras; a NOWO passa a DIGI no mês 12 (set. 2025) | Reunião + Pedro | A DIGI comprou a NOWO; a ANACOM reporta DIGI/NOWO numa só linha. Dados verificados | `entry_tick=None` (sem DIGI) |
+| D5 | 4 operadoras; a NOWO passa a DIGI no mês 12 (nov. 2024) | Reunião + Pedro | A DIGI comprou a NOWO; a ANACOM reporta DIGI/NOWO numa só linha. Dados verificados | `entry_tick=None` (sem DIGI) |
 | D6 | Quotas iniciais da ANACOM, 3T2024: 41,8 / 35,0 / 20,6 / 2,6% | Reunião | Último trimestre antes da entrada | `initial_shares` |
 | D7 | Preço da NOWO €26,35 | Proposta técnica, aceite | ANACOM, *O Sector das Comunicações 2024*, Tabela 20: única fonte oficial com o mesmo tipo de oferta | `prices` |
 | D8 | Antes da DIGI os preços são fixos (conluio tácito) | Pedro | Os preços das marcas principais quase não mudaram entre 2024 e 2025 | `BanditPricePolicy(learn_before_entry=True)` |
@@ -95,7 +95,7 @@ Quando aprendem os preços, os incumbentes acabam perto do preço de lista sem c
 
 - **Baixar sozinho compensa a todos.** Sozinha a ×0,90, a MEO ganha +14,9% de lucro, a NOS +19,3% e a Vodafone +36,2%. Manter o preço de lista não é um equilíbrio para nenhum dos três: é um dilema do prisioneiro. Com δ = 17,8% a MEO não ganhava.
 - **O bandit volta ao preço de lista.** Nos anos 6–10, o preço de lista é escolhido em 85% (MEO), 88% (NOS) e 88% (Vodafone) das decisões. O multiplicador médio é 0,98.
-- **Robusto aos parâmetros do bandit.** Nas 9 combinações de ε ∈ {0,05; 0,10; 0,20} e α ∈ {0,1; 0,2; 0,4}, o lucro conjunto fica entre −2,3% e −4,4% e o multiplicador médio entre 0,97 e 0,98.
+- **Robusto aos parâmetros do bandit.** Nas 9 combinações de ε ∈ {0,05; 0,10; 0,20} e α ∈ {0,1; 0,2; 0,4}, o lucro conjunto fica entre −2,2% e −4,4% e o multiplicador médio entre 0,97 e 0,98.
 - **O horizonte da decisão conta.** Com decisões de 12 em 12 meses os incumbentes baixam mais (multiplicador 0,94) e a DIGI cresce menos. Com decisões de 3 em 3 meses, uma descida reduz logo a margem, mas os clientes ganhos chegam ao longo de contratos de 24 meses.
 - **Versões anteriores.** Com o bandit antes da D23: −3,2% e DIGI 15,7% (`results/pricing_bandit_v1/`). Com δ = 17,8%: −6,0% e DIGI 10,6% (`results/pricing_delta178/`). A ordem dos cenários e o dilema do prisioneiro mantêm-se em todas.
 - **Leitura.** É compatível com Calvano et al. (2020): algoritmos independentes ficam acima do preço competitivo. Mas este bandit não observa os preços dos rivais, por isso o resultado vem sobretudo da recompensa de curto prazo, e não de uma estratégia de conluio aprendida. Coincide com o observado: os incumbentes não baixaram as marcas principais e responderam com marcas low-cost (Uzo, Woo, Amigo).
@@ -106,13 +106,13 @@ Figuras em `results/pricing/figures/`: quota da DIGI, preços aprendidos, lucro 
 
 Há três limitações conhecidas, todas documentadas na especificação, e duas tarefas por fazer.
 
-- **Deriva lenta sem DIGI.** Com δ = 10% a deriva quase desaparece (MEO 41,3% → 40,9% em 60 meses), mas a NOWO perde quota sem a entrada (2,8% → 1,5%). Todos os cenários são comparados entre si com os mesmos números aleatórios.
+- **Deriva lenta sem DIGI.** Com δ = 10% a deriva quase desaparece (MEO 41,1% → 39,7% entre os meses 12 e 72, 30 corridas), mas a NOWO perde quota sem a entrada (2,4% → 1,5%). Todos os cenários são comparados entre si com os mesmos números aleatórios.
 - **Pouca mudança no fim do contrato.** No modelo menos de 1% muda de operadora no fim do contrato; Confraria et al. estimam 13,6% (rede móvel, 2014). O modelo subestima a mobilidade.
 - **Horizonte longo.** Os 10 anos vão além dos 30 meses com dados; os valores servem para comparar cenários, não são previsões.
 
 - [x] Desconto de refidelização (D14): 17,8% confirmado e depois revertido para 10% pelo Pedro em 29/10; modelo recalibrado e simulações repetidas
 - [x] 70% de fidelizados no início (D15): aceite pelo Pedro em 29/10
-- [x] Correr as análises de sensibilidade: κ 0,10/0,30; saídas 0,3–1%; fidelizados 50–90%; δ 17,8%; bloqueio vs penalização; margem 60% — uma alteração de cada vez, sem recalibrar, 20 corridas por cenário (`experiments/run_sensitivity.py`, `analysis/analyze_sensitivity.py`, resultados em `results/sensitivity/`). As duas conclusões da tarefa 5 mantêm-se nas 10 variantes: baixar sozinho compensa a pelo menos um incumbente (com κ = 0,30 a MEO perde 3%), e o bandit fica perto do preço de lista (multiplicador 0,97–0,98, lucro conjunto −0,2% a −4,1%). As variantes não são recalibradas: medem a robustez das conclusões, não o ajuste aos dados
+- [x] Correr as análises de sensibilidade: κ 0,10/0,30; saídas 0,3–1%; fidelizados 50–90%; δ 17,8%; bloqueio vs penalização; margem 60% — uma alteração de cada vez, sem recalibrar, 20 corridas por cenário (`experiments/run_sensitivity.py`, `analysis/analyze_sensitivity.py`, resultados em `results/sensitivity/`). As duas conclusões da tarefa 5 mantêm-se nas 9 alterações: baixar sozinho compensa a pelo menos um incumbente (com κ = 0,30 a MEO perde 3%), e o bandit fica perto do preço de lista (multiplicador 0,97–0,98, lucro conjunto −0,1% a −4,1%). As variantes não são recalibradas: medem a robustez das conclusões, não o ajuste aos dados
 - [ ] Escrever as secções 3–5 do relatório em inglês
 
 ## Onde está cada coisa
