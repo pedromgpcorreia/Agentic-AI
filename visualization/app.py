@@ -3,7 +3,7 @@
 This is the Mesa equivalent of the NetLogo interface: sliders and Reset / Play / Step
 buttons on the left, the consumers' network and the plots on the right, in a web page.
 
-Install once:   python -m pip install "mesa[viz,network]>=3.5,<4"
+Install once:   python -m pip install "mesa[viz,network]>=3.5,<4" "ipyvue<3" "ipyvuetify<3"
 Run:            solara run visualization/app.py      (repository root; opens http://localhost:8765)
 
 The window version without a browser is visualization/live.py (only needs matplotlib).
@@ -31,7 +31,7 @@ ANACOM = {19: 2.8, 25: 3.0, 28: 3.2}           # DIGI/NOWO share (%), ANACOM
 class LiveTelecomModel(TelecomMarketModel):
     """Calibrated model with the price policy chosen in the interface."""
 
-    def __init__(self, norm_influence=0.10, exploration=0.03, entry_tick=12,
+    def __init__(self, norm_influence=0.10, exploration=CALIBRATED["exploration"], entry_tick=12,
                  policy=POLICIES[0], seed=1):
         params = dict(CALIBRATED, norm_influence=norm_influence, exploration=exploration)
         if abs(norm_influence - CALIBRATED["norm_influence"]) > 1e-9:
@@ -66,7 +66,7 @@ def network_figure(model):
 
 
 def NetworkView(model):
-    return solara.FigureMatplotlib(network_figure(model), format="png")
+    return solara.FigureMatplotlib(network_figure(model), format="png", dpi=72)
 
 
 def anacom_points(ax):
@@ -76,10 +76,18 @@ def anacom_points(ax):
     ax.legend(fontsize=7)
 
 
+def dash_nos(ax):
+    """MEO and NOS share the same list price: dash NOS so that MEO stays visible."""
+    for line in ax.get_lines():
+        if line.get_label() == "price_NOS":
+            line.set_linestyle("--")
+    ax.legend(fontsize=7)
+
+
 model_params = {
     "norm_influence": {"type": "SliderFloat", "value": 0.10, "label": "Norm influence (w)",
                        "min": 0.0, "max": 0.5, "step": 0.01},
-    "exploration": {"type": "SliderFloat", "value": 0.03, "label": "Exploration",
+    "exploration": {"type": "SliderFloat", "value": CALIBRATED["exploration"], "label": "Exploration",
                     "min": 0.0, "max": 0.1, "step": 0.005},
     "entry_tick": {"type": "SliderInt", "value": 12, "label": "DIGI entry (month)",
                    "min": 0, "max": 36, "step": 1},
@@ -94,7 +102,7 @@ shares = make_plot_component(
      "share_DIGI": COLORS[3]}, post_process=anacom_points)
 prices = make_plot_component(
     {"price_MEO": COLORS[0], "price_NOS": COLORS[1], "price_Vodafone": COLORS[2],
-     "price_DIGI": COLORS[3]})
+     "price_DIGI": COLORS[3]}, post_process=dash_nos)
 contracts = make_plot_component("pct_contracted")
 
 page = SolaraViz(
@@ -102,5 +110,6 @@ page = SolaraViz(
     components=[(NetworkView, 0), shares, prices, contracts],
     model_params=model_params,
     name="Consumer Choice - DIGI entry",
-    play_interval=150,
+    play_interval=1,
+    render_interval=3,
 )
