@@ -93,7 +93,7 @@ def baseline():
                    "orange_share_sd": g.orange_share.std(ddof=1)})
     hz = pd.DataFrame(hz)
     hz.round(4).to_csv(f"{TAB}/baseline_horizon.csv", index=False)
-    SUMMARY["baseline_horizon"] = hz.round(4).to_dict(orient="records")
+    SUMMARY["baseline_horizon"] = hz.round(6).to_dict(orient="records")
 
     # ---- Figure 1: time series and distribution ----
     fig, axs = plt.subplots(1, 3, figsize=(W, 1.75))
@@ -154,7 +154,7 @@ def sensitivity(name, fig_no):
                      "clustering_ci95_low": c["ci95_low"], "clustering_ci95_high": c["ci95_high"]})
     tab = pd.DataFrame(rows)
     tab.round(3).to_csv(f"{TAB}/sensitivity_{name}.csv", index=False)
-    SUMMARY[f"sensitivity_{name}"] = tab.round(4).to_dict(orient="records")
+    SUMMARY[f"sensitivity_{name}"] = tab.round(6).to_dict(orient="records")
 
     vals = sorted(d[name].unique())
     fig, axs = plt.subplots(1, 2, figsize=(W, 1.75))
