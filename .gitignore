@@ -19,3 +19,5 @@ results/*_quick/
 main_output.txt
 original_model_output.txt
 new_model_output.txt
+original_model_full_output.txt
+new_model_full_output.txt

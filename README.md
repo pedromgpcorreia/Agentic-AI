@@ -79,6 +79,21 @@ to `original_model_output.txt` and `new_model_output.txt`. Options: `--interface
 `--no-interface`. In VS Code, open the folder, select the Python interpreter where the
 requirements are installed, open either file and press Run.
 
+### Self-contained versions (`_full`)
+
+`original_model_full.py` and `new_model_full.py` do the same as the two files above, with the
+same options, but each holds all its code (model, simulations of the report and interface)
+and runs on its own, without the rest of this folder. Their code is the same as in
+`consumer_choice/`, `experiments/`, `visualization/` and `main.py`, and they print the same
+numbers (checked by running each one alone in an empty folder). Results are saved to
+`original_model_full_output.txt` and `new_model_full_output.txt`.
+
+```bash
+python -m pip install "mesa[viz,network]>=3.5,<4" "ipyvue<3" "ipyvuetify<3" numpy pandas scipy matplotlib
+python original_model_full.py      # about 6 minutes on 8 cores
+python new_model_full.py           # about 11 minutes on 8 cores
+```
+
 ## How to run
 
 Python 3.12 or later (required by Mesa 3.5). Install the requirements once (`pip install -r requirements.txt`), then
