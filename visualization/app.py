@@ -16,11 +16,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import solara  # noqa: E402
 from matplotlib.collections import LineCollection  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
-from mesa.visualization import SolaraViz, make_plot_component  # noqa: E402
+from mesa.visualization import SolaraViz  # noqa: E402
 
 from consumer_choice.calibrated import CALIBRATED  # noqa: E402
 from consumer_choice.learning import BanditPricePolicy, FixedPricePolicy  # noqa: E402
 from consumer_choice.telecom import TelecomMarketModel  # noqa: E402
+from visualization.safe_plot import make_safe_plot_component  # noqa: E402
 
 COLORS = ["#2a78d6", "#eb6834", "#1a9e77", "#7a3fbf"]
 NOWO_COLOR = "#9a9a9a"
@@ -47,11 +48,12 @@ def network_figure(model):
     """Consumers at their positions, coloured by operator, with friendship links."""
     fig = Figure(figsize=(6, 6))
     ax = fig.subplots()
-    segs = [(c.pos, f.pos) for c in model.consumers for f in c.friends if id(c) < id(f)]
+    consumers = list(model.consumers)            # snapshot: the model may be stepping
+    segs = [(c.pos, f.pos) for c in consumers for f in list(c.friends) if id(c) < id(f)]
     ax.add_collection(LineCollection(segs, colors="#d8d7d3", linewidths=0.4, zorder=1))
     colours = [COLORS[c.choice] if (c.choice < 3 or model.digi_entered) else NOWO_COLOR
-               for c in model.consumers]
-    ax.scatter([c.pos[0] for c in model.consumers], [c.pos[1] for c in model.consumers],
+               for c in consumers]
+    ax.scatter([c.pos[0] for c in consumers], [c.pos[1] for c in consumers],
                s=12, c=colours, zorder=2, edgecolors="white", linewidths=0.3)
     ax.set_xlim(-26.5, 26.5)
     ax.set_ylim(-26.5, 26.5)
@@ -97,19 +99,19 @@ model_params = {
              "min": 1, "max": 100, "step": 1},
 }
 
-shares = make_plot_component(
+shares = make_safe_plot_component(
     {"share_MEO": COLORS[0], "share_NOS": COLORS[1], "share_Vodafone": COLORS[2],
      "share_DIGI": COLORS[3]}, post_process=anacom_points)
-prices = make_plot_component(
+prices = make_safe_plot_component(
     {"price_MEO": COLORS[0], "price_NOS": COLORS[1], "price_Vodafone": COLORS[2],
      "price_DIGI": COLORS[3]}, post_process=dash_nos)
-contracts = make_plot_component("pct_contracted")
+contracts = make_safe_plot_component("pct_contracted")
 
 page = SolaraViz(
     LiveTelecomModel(),
     components=[(NetworkView, 0), shares, prices, contracts],
     model_params=model_params,
     name="Consumer Choice - DIGI entry",
-    play_interval=1,
-    render_interval=3,
+    play_interval=100,
+    render_interval=1,
 )

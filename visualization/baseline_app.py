@@ -18,10 +18,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import solara  # noqa: E402
 from matplotlib.collections import LineCollection  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
-from mesa.visualization import SolaraViz, make_plot_component  # noqa: E402
+from mesa.visualization import SolaraViz  # noqa: E402
 
 from consumer_choice.model import ORANGE, ConsumerChoiceModel  # noqa: E402
 from experiments.run_experiments import BASELINE  # noqa: E402
+from visualization.safe_plot import make_safe_plot_component  # noqa: E402
 
 ORANGE_C, BLUE_C = "#eb6834", "#2a78d6"
 
@@ -37,18 +38,19 @@ def network_figure(model):
     """Consumers at their positions, coloured by product, with friendship links."""
     fig = Figure(figsize=(6, 6))
     ax = fig.subplots()
-    segs = [(c.pos, f.pos) for c in model.consumers for f in c.friends if id(c) < id(f)]
+    consumers = list(model.consumers)            # snapshot: the model may be stepping
+    segs = [(c.pos, f.pos) for c in consumers for f in list(c.friends) if id(c) < id(f)]
     ax.add_collection(LineCollection(segs, colors="#d0d0d0", linewidths=0.7, zorder=1))
-    ax.scatter([c.pos[0] for c in model.consumers], [c.pos[1] for c in model.consumers], s=60,
-               c=[ORANGE_C if c.choice == ORANGE else BLUE_C for c in model.consumers],
+    ax.scatter([c.pos[0] for c in consumers], [c.pos[1] for c in consumers], s=60,
+               c=[ORANGE_C if c.choice == ORANGE else BLUE_C for c in consumers],
                zorder=2, edgecolors="white", linewidths=0.5)
     ax.set_xlim(-26.5, 26.5)
     ax.set_ylim(-26.5, 26.5)
     ax.set_aspect("equal")
     ax.set_xticks([])
     ax.set_yticks([])
-    n = len(model.consumers)
-    orange = sum(c.choice == ORANGE for c in model.consumers)
+    n = len(consumers)
+    orange = sum(c.choice == ORANGE for c in consumers)
     ax.set_title(f"Tick {model.steps} - orange {orange}, blue {n - orange} - "
                  f"clustering {model.consumer_cluster():.3f}", fontsize=9, loc="left")
     return fig
@@ -88,14 +90,14 @@ model_params = {
     "seed": {"type": "SliderInt", "value": 1, "label": "Random seed", "min": 1, "max": 100, "step": 1},
 }
 
-counts = make_plot_component({"orange": ORANGE_C, "blue": BLUE_C}, post_process=label_counts)
-clustering = make_plot_component({"clustering": "#1a1a1a"}, post_process=label_clustering)
+counts = make_safe_plot_component({"orange": ORANGE_C, "blue": BLUE_C}, post_process=label_counts)
+clustering = make_safe_plot_component({"clustering": "#1a1a1a"}, post_process=label_clustering)
 
 page = SolaraViz(
     LiveConsumerChoiceModel(**BASELINE),
     components=[(NetworkView, 0), counts, clustering],
     model_params=model_params,
     name="Consumer Choice - original model",
-    play_interval=1,
-    render_interval=5,
+    play_interval=100,
+    render_interval=1,
 )
