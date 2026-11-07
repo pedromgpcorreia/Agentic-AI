@@ -7,6 +7,7 @@ André Pires, José Pinho, Manuel Sampaio and Pedro Correia — Faculty of Econo
 | `Report_Consumer_Choice.docx` | Project report (LNCS format), tasks 1 to 6 |
 | `original_model_full.py` | Original Consumer Choice model (tasks 1 and 2): model, interface and the simulations behind Tables 7 to 11 |
 | `new_model_full.py` | New model, DIGI's entry with learning incumbents (tasks 3 to 6): model, interface and the simulations behind the calibration and Tables 15 to 17 |
+| `papers/` | The papers and sources cited in the report, numbered as in its reference list (index in `papers/README.md`) |
 | `requirements.txt` | Python packages needed by both files |
 
 Each `.py` file is self-contained: it runs on its own, without any other file.
