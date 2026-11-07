@@ -59,7 +59,7 @@ nem nos preços das marcas principais.
 | DIGI (a partir da entrada) | herda a NOWO | €22,00 | 3 meses | 0,572 → 0,756 |
 
 Fontes: quotas ANACOM (pacotes de serviços, 3T2024); preços barómetro CNN Portugal/DECO PROteste
-(outubro 2025; a NOS estava a €42,49 antes de baixar €2 com corte de velocidade); DIGI €10 fibra 1 Gbps
+(setembro 2025, 11/09/2025: MEO e NOS €42,49, Vodafone €40,50; em outubro a NOS baixou €2 com corte de velocidade); DIGI €10 fibra 1 Gbps
 + €12 TV e compromisso de 3 meses (Observador, 04/11/2024); NOWO €26,35: ANACOM, *O Sector das Comunicações 2024*,
 Tabela 20 (mensalidade mínima BLF+TVS, dezembro de 2024, com IVA, contratos de 24 meses).
 
@@ -243,7 +243,7 @@ pago, % de consumidores fidelizados, receita e margem por operadora, qualidade d
 17. Calvano, E., Calzolari, G., Denicolò, V., Pastorello, S.: Artificial Intelligence, Algorithmic Pricing, and Collusion. Am. Econ. Rev. 110(10), 3267–3297 (2020). https://doi.org/10.1257/aer.20190623
 
 Fontes de dados: ANACOM (pacotes de serviços 1T2024, 3T2024, 2T2025, 4T2025, 1T2026; reclamações 2025 e 2T2026);
-barómetro CNN Portugal/DECO PROteste (outubro 2025); DECO PROteste (penalizações, Lei 16/2022); Observador (preços DIGI, 2024).
+barómetro CNN Portugal/DECO PROteste (setembro 2025); DECO PROteste (penalizações, Lei 16/2022); Observador (preços DIGI, 2024).
 
 Notas sobre o documento do Zé: o Wang & Wang foi publicado em 2017 (o DOI correto é …2520); no Griffin, os 54% referem-se
 a mudanças de tarifário dentro da mesma operadora que aumentaram o sobrecusto face ao melhor plano, sem atribuição a
