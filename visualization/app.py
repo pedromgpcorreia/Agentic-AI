@@ -18,6 +18,8 @@ from matplotlib.collections import LineCollection  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
 from mesa.visualization import SolaraViz  # noqa: E402
 
+import inspect  # noqa: E402
+
 from consumer_choice.calibrated import CALIBRATED  # noqa: E402
 from consumer_choice.learning import BanditPricePolicy, FixedPricePolicy  # noqa: E402
 from consumer_choice.telecom import TelecomMarketModel  # noqa: E402
@@ -91,6 +93,49 @@ def label_contracts(ax):
     ax.set_ylabel("share under contract")
 
 
+# fixed parameters of the report, shown in the page and not changeable from it
+_DEF = {k: v.default for k, v in inspect.signature(TelecomMarketModel.__init__).parameters.items()
+        if v.default is not inspect.Parameter.empty}
+_DEF.update(CALIBRATED)
+_BANDIT = {k: v.default for k, v in inspect.signature(BanditPricePolicy.__init__).parameters.items()
+           if v.default is not inspect.Parameter.empty}
+
+
+def _pct(x):
+    return f"{x * 100:g}%"
+
+
+def FixedParameters(model):
+    d = _DEF
+    ops = " / ".join(d["names"])
+    rows = [
+        ("Households at the start (minimum)", f"{d['num_consumers']} ({d['min_consumers']})"),
+        ("Average connections (friends)", d["avg_connections"]),
+        ("Information exchange", d["information_exchange"]),
+        (f"Initial shares {ops}", " / ".join(f"{x:g}%" for x in d["initial_shares"]) + " (ANACOM, Q3 2024)"),
+        (f"List prices {ops}", " / ".join(f"€{x:.2f}" for x in d["prices"])),
+        (f"Quality {ops}", " / ".join(f"{x:.3f}" for x in d["qualities"]) + " (ANACOM complaints)"),
+        ("Brand constants", " / ".join(f"{x:+.4f}" for x in d["brand_constants"]) + " (calibrated)"),
+        ("Price weight", f"{model.price_weight:.4f} (from the norm weight, Confraria et al.)"),
+        ("Contract length incumbents / DIGI", f"{d['contract_months'][0]} / {d['digi_contract']} months"),
+        ("Households under contract at the start", _pct(d["initial_contracted"])),
+        ("Initial contracts that are renewals", _pct(d["initial_renewed"])),
+        ("Renewal discount", _pct(d["renewal_discount"])),
+        ("Cost of commitment (mean, spread)", f"€{d['commit_cost_mean']:.2f}/month, ±{_pct(d['commit_cost_spread'])}"),
+        ("Early exit", "penalty of Lei 16/2022" if d["exit_rule"] == "penalty" else d["exit_rule"]),
+        ("DIGI price", f"€{d['digi_price']:.2f}/month"),
+        ("DIGI quality", f"{d['digi_quality_start']:.3f} → {d['digi_quality_end']:.3f} in {d['digi_maturation']} months"),
+        ("Exits / net growth of households", f"{_pct(d['exit_rate'])} per month / {_pct(d['net_growth_year'])} per year"),
+        ("Margin of the incumbents", _pct(d["margin"])),
+        ("Bandit (learned prices)", f"ε = {_BANDIT['epsilon']}, α = {_BANDIT['alpha']}, decision every "
+                                    f"{_BANDIT['period']} months, arms × " + ", ".join(f"{a:.2f}" for a in _BANDIT["arms"])),
+    ]
+    table = "\n".join(f"| {k} | {v} |" for k, v in rows)
+    return solara.Markdown(
+        "**Fixed parameters of the report** (not changeable here; see Sect. 4 of the report)\n\n"
+        "| Parameter | Value |\n|---|---|\n" + table)
+
+
 model_params = {
     "norm_influence": {"type": "SliderFloat", "value": 0.10, "label": "Norm influence (w)",
                        "min": 0.0, "max": 0.5, "step": 0.01},
@@ -114,7 +159,7 @@ contracts = make_safe_plot_component("pct_contracted", post_process=label_contra
 
 page = SolaraViz(
     LiveTelecomModel(),
-    components=[(NetworkView, 0), shares, prices, contracts],
+    components=[(NetworkView, 0), shares, prices, contracts, (FixedParameters, 0)],
     model_params=model_params,
     name="Consumer Choice - DIGI entry",
     play_interval=100,
