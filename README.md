@@ -54,7 +54,22 @@ slides/                         presentation of tasks 1-6 (open slides/deck.html
 
 ## How to run
 
-Python 3.10 or later.
+Python 3.12 or later (required by Mesa 3.5). Install the requirements once (`pip install -r requirements.txt`), then
+run every simulation of the report with a single file, from the repository root or with the
+Run button of VS Code (select the project's Python interpreter first):
+
+```bash
+python main.py          # parts 1 to 3, about 20 minutes on 8 cores
+python main.py 2        # only part 2
+```
+
+`main.py` uses the same models, parameters and seeds as the report and prints its tables:
+part 1 is the original model (tables 7 to 11), part 2 the new model with the learning
+incumbents (calibration, tables 15 and 16, learned prices) and part 3 the sensitivity
+analysis (table 17). The output is also saved to `main_output.txt`; `data/` and `results/`
+are not changed.
+
+The experiments that wrote `data/` and `results/`, and the report:
 
 ```bash
 pip install -r requirements.txt

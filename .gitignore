@@ -16,3 +16,4 @@ venv/
 
 # Test runs (quick mode)
 results/*_quick/
+main_output.txt
