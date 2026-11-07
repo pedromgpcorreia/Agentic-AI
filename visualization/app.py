@@ -35,11 +35,12 @@ class LiveTelecomModel(TelecomMarketModel):
     """Calibrated model with the price policy chosen in the interface."""
 
     def __init__(self, norm_influence=0.10, exploration=CALIBRATED["exploration"], entry_tick=12,
-                 policy=POLICIES[0], seed=1):
+                 policy=POLICIES[0], seed=4000):
         params = dict(CALIBRATED, norm_influence=norm_influence, exploration=exploration)
         if abs(norm_influence - CALIBRATED["norm_influence"]) > 1e-9:
             params.pop("brand_constants")      # constants were calibrated for w = 0.10
         super().__init__(entry_tick=int(entry_tick), rng=int(seed), **params)
+        self.policy_name = policy
         if policy == POLICIES[1]:
             self.price_policy = BanditPricePolicy(seed=int(seed))
         elif policy == POLICIES[2]:
@@ -63,7 +64,7 @@ def network_figure(model):
     ax.set_xticks([])
     ax.set_yticks([])
     name3 = "DIGI" if model.digi_entered else "NOWO"
-    ax.set_title(f"Month {model.steps} - population {len(model.consumers)} - "
+    ax.set_title(f"Month {model.steps} - prices: {model.policy_name} - population {len(consumers)}\n"
                  f"blue MEO, orange NOS, green Vodafone, "
                  f"{'purple' if model.digi_entered else 'grey'} {name3}", fontsize=8, loc="left")
     return fig
@@ -132,6 +133,7 @@ def FixedParameters(model):
     ]
     table = "\n".join(f"| {k} | {v} |" for k, v in rows)
     return solara.Markdown(
+        "**After changing a slider or the price policy, press Reset**: the change applies to a new run.\n\n"
         "**Fixed parameters of the report** (not changeable here; see Sect. 4 of the report)\n\n"
         "| Parameter | Value |\n|---|---|\n" + table)
 
@@ -145,8 +147,8 @@ model_params = {
                    "min": 0, "max": 36, "step": 1},
     "policy": {"type": "Select", "value": POLICIES[0], "values": POLICIES,
                "label": "Incumbents' prices after entry"},
-    "seed": {"type": "SliderInt", "value": 1, "label": "Random seed",
-             "min": 1, "max": 100, "step": 1},
+    "seed": {"type": "SliderInt", "value": 4000, "label": "Random seed (report runs: 4000 to 4029)",
+             "min": 4000, "max": 4029, "step": 1},
 }
 
 shares = make_safe_plot_component(

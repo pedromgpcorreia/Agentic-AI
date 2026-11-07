@@ -60,6 +60,11 @@ def NetworkView(model):
     return solara.FigureMatplotlib(network_figure(model), format="png", dpi=72)
 
 
+def HowTo(model):
+    return solara.Markdown("**After changing a slider, press Reset**: the change applies to a new run. "
+                           "The defaults are the baseline of the report.")
+
+
 def label_counts(ax):
     ax.set_ylabel("consumers")
     ax.legend(fontsize=7)
@@ -95,7 +100,7 @@ clustering = make_safe_plot_component({"clustering": "#1a1a1a"}, post_process=la
 
 page = SolaraViz(
     LiveConsumerChoiceModel(**BASELINE),
-    components=[(NetworkView, 0), counts, clustering],
+    components=[(NetworkView, 0), counts, clustering, (HowTo, 0)],
     model_params=model_params,
     name="Consumer Choice - original model",
     play_interval=100,
