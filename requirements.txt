@@ -1,4 +1,6 @@
-mesa>=3.5,<4
+mesa[viz,network]>=3.5,<4
+ipyvue<3
+ipyvuetify<3
 numpy
 pandas
 scipy

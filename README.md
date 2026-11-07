@@ -10,8 +10,8 @@ statistical analysis and the project report.
 > todas as decisões tomadas nas tarefas 3–5, quem as tomou, a justificação, como reverter,
 > a comparação com o protótipo do Zé e os resultados. Detalhe técnico em
 > [`docs/model_v2_spec.md`](docs/model_v2_spec.md). Para ver o modelo a correr:
-> `pip install "mesa[viz,network]" "ipyvue<3" "ipyvuetify<3"` e `solara run visualization/app.py` (browser) ou
-> `python visualization/live.py` (janela).
+> `pip install -r requirements.txt` e depois `python original_model.py` (modelo original) ou
+> `python new_model.py` (modelo novo): abrem a interface do Mesa no browser e depois correm as simulações do relatório.
 
 Status of the project tasks:
 
@@ -51,6 +51,33 @@ results/tables/                 tables and summary.json
 report/                         report (Word, LNCS template) and the script that builds it
 slides/                         presentation of tasks 1-6 (open slides/deck.html; see slides/README.md)
 ```
+
+## The two models of the deliverable
+
+Python 3.12 or later (required by Mesa 3.5). Install the requirements once, from this folder:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+| File | Model | What it does |
+|---|---|---|
+| `original_model.py` | Original Consumer Choice model (tasks 1 and 2), `consumer_choice/model.py` | Opens the model's interface in the browser, then runs the baseline and sensitivity simulations of the report (Tables 7 to 11) |
+| `new_model.py` | New model: DIGI's entry with learning incumbents (tasks 3 to 6), `consumer_choice/telecom.py`, `learning.py`, `calibrated.py` | Opens the model's interface in the browser, then runs the calibration, price scenarios and sensitivity analysis of the report (Tables 15 to 17) |
+
+```bash
+python original_model.py      # interface, then the simulations (about 7 minutes on 8 cores)
+python new_model.py           # interface, then the simulations (about 13 minutes on 8 cores)
+```
+
+The interface is Mesa's own visualization (SolaraViz), the equivalent of the NetLogo interface:
+the agents in their friendship network and the plots of the outputs, with Reset, Play / Pause
+and Step buttons and sliders. Its defaults are the parameters of the report. Press Enter in the
+terminal to close it; the simulations of the report then run with the same parameters and
+random seeds as the report, so the printed numbers are those of the report. They are also saved
+to `original_model_output.txt` and `new_model_output.txt`. Options: `--interface-only` and
+`--no-interface`. In VS Code, open the folder, select the Python interpreter where the
+requirements are installed, open either file and press Run.
 
 ## How to run
 
@@ -127,7 +154,7 @@ The specification and the log of all decisions with their justification are in
 | Analysis | `python analysis/analyze_pricing.py [folder]` | `results/pricing/figures`, `results/pricing/tables` |
 | Sensitivity analysis (task 6) | `python experiments/run_sensitivity.py` | `results/sensitivity/runs.csv` |
 | Sensitivity tables and figure | `python analysis/analyze_sensitivity.py [folder]` | `results/sensitivity/tables`, `results/sensitivity/figures` |
-| Mesa browser interface (SolaraViz) | `pip install "mesa[viz,network]" "ipyvue<3" "ipyvuetify<3"`, then `solara run visualization/app.py` | web page at http://localhost:8765 |
+| Mesa browser interface (SolaraViz) | `python new_model.py --interface-only` (or `solara run visualization/app.py`); original model: `python original_model.py --interface-only` | web page at http://localhost:8765 |
 | Live view (NetLogo-style window) | `python visualization/live.py` | interactive window; `--gif out.gif` saves an animation |
 
 The calibrated parameters are in `consumer_choice/calibrated.py`; the price policies
