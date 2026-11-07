@@ -90,8 +90,8 @@ model_params = {
     "seed": {"type": "SliderInt", "value": 1, "label": "Random seed", "min": 1, "max": 100, "step": 1},
 }
 
-counts = make_safe_plot_component({"orange": ORANGE_C, "blue": BLUE_C}, post_process=label_counts)
-clustering = make_safe_plot_component({"clustering": "#1a1a1a"}, post_process=label_clustering)
+counts = make_safe_plot_component({"orange": ORANGE_C, "blue": BLUE_C}, post_process=label_counts, xlabel="Tick")
+clustering = make_safe_plot_component({"clustering": "#1a1a1a"}, post_process=label_clustering, xlabel="Tick")
 
 page = SolaraViz(
     LiveConsumerChoiceModel(**BASELINE),

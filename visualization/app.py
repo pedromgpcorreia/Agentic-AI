@@ -83,7 +83,12 @@ def dash_nos(ax):
     for line in ax.get_lines():
         if line.get_label() == "price_NOS":
             line.set_linestyle("--")
+    ax.set_ylabel("list price (EUR/month)")
     ax.legend(fontsize=7)
+
+
+def label_contracts(ax):
+    ax.set_ylabel("share under contract")
 
 
 model_params = {
@@ -101,11 +106,11 @@ model_params = {
 
 shares = make_safe_plot_component(
     {"share_MEO": COLORS[0], "share_NOS": COLORS[1], "share_Vodafone": COLORS[2],
-     "share_DIGI": COLORS[3]}, post_process=anacom_points)
+     "share_DIGI": COLORS[3]}, post_process=anacom_points, xlabel="Month")
 prices = make_safe_plot_component(
     {"price_MEO": COLORS[0], "price_NOS": COLORS[1], "price_Vodafone": COLORS[2],
-     "price_DIGI": COLORS[3]}, post_process=dash_nos)
-contracts = make_safe_plot_component("pct_contracted")
+     "price_DIGI": COLORS[3]}, post_process=dash_nos, xlabel="Month")
+contracts = make_safe_plot_component("pct_contracted", post_process=label_contracts, xlabel="Month")
 
 page = SolaraViz(
     LiveTelecomModel(),
